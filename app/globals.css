@@ -1,26 +1,529 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Resin by Ash design tokens.
+ * Extracted from the Claude Design exports in /extras (storefront, desktop, admin, components).
+ */
+@theme {
+  /* Surfaces */
+  --color-cream: #fbf9f6; /* page background */
+  --color-sand: #f1ebe4; /* section bands, announcement bar, admin sidebar */
+  --color-sand-2: #ece5de; /* hairlines, alt placeholder tone */
+  --color-sand-3: #f6f2ed; /* price box, selected list row */
+  --color-line: #e2d8ce; /* input + chip borders */
+  --color-dot: #c9bfb5; /* inactive carousel dots */
+
+  /* Ink */
+  --color-brown: #463229; /* text, footer, selected chips */
+  --color-cocoa: #7a6455; /* secondary text, meta */
+  --color-muted: #9a8f8c; /* struck-through prices */
+
+  /* Accents */
+  --color-caramel: #9e6842; /* primary CTA */
+  --color-caramel-dark: #87563a; /* CTA hover */
+  --color-gold: #c9a45c; /* hairlines, discount pill, step rings */
+
+  /* Status pills (admin) */
+  --color-st-new-bg: #f3e4d6;
+  --color-st-new-fg: #7a4a2a;
+  --color-st-confirmed-bg: #efe7d3;
+  --color-st-confirmed-fg: #5e4a1e;
+  --color-st-progress-bg: #f6edd9;
+  --color-st-progress-fg: #6b5320;
+  --color-st-shipped-bg: #e6e0da;
+  --color-st-shipped-fg: #463229;
+  --color-st-done-bg: #e3eadf;
+  --color-st-done-fg: #36513a;
+  --color-st-off-bg: #eeeae7;
+  --color-st-off-fg: #6e625c;
+
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+
+  --radius-card: 14px;
+  --radius-field: 12px;
+
+  --shadow-float: 0 6px 18px rgb(70 50 41 / 0.16);
+  --shadow-lift: 0 14px 34px rgb(70 50 41 / 0.12);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    background: var(--color-cream);
+    color: var(--color-brown);
+    -webkit-tap-highlight-color: transparent;
+    scroll-padding-top: 96px;
+    interpolate-size: allow-keywords;
+  }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-cream);
+    color: var(--color-brown);
+  }
+  a {
+    color: inherit;
+  }
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-caramel);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  ::selection {
+    background: #ecd9c6;
+  }
+  input[type="range"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--color-caramel);
+  }
+  summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Page gutter: 20px on phones, 40px on tablets, 120px at the 1440 desktop design width */
+  .wrap {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  @media (min-width: 768px) {
+    .wrap {
+      padding-inline: 40px;
+    }
+  }
+  @media (min-width: 1280px) {
+    .wrap {
+      padding-inline: 120px;
+    }
+  }
+
+  /* Full-bleed on phones (e.g. product gallery), gutters from 1024px */
+  @media (min-width: 1024px) {
+    .wrap-lg {
+      width: 100%;
+      max-width: 1440px;
+      margin-inline: auto;
+      padding-inline: 40px;
+    }
+  }
+  @media (min-width: 1280px) {
+    .wrap-lg {
+      padding-inline: 120px;
+    }
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  @media (min-width: 1024px) {
+    .eyebrow {
+      font-size: 13px;
+      letter-spacing: 0.16em;
+    }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 48px;
+    padding-inline: 16px;
+    white-space: nowrap;
+    border-radius: var(--radius-field);
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      scale 0.15s ease;
+    touch-action: manipulation;
+  }
+  @media (min-width: 768px) {
+    .btn {
+      padding-inline: 24px;
+    }
+  }
+  .btn:active {
+    scale: 0.98;
+  }
+  @media (min-width: 1024px) {
+    .btn {
+      height: 54px;
+      padding-inline: 32px;
+      font-size: 16px;
+    }
+  }
+  .btn-primary {
+    background: var(--color-caramel);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--color-caramel-dark);
+    color: #fff;
+  }
+  .btn-outline {
+    border: 1px solid var(--color-brown);
+    color: var(--color-brown);
+    background: transparent;
+  }
+  .btn-outline:hover {
+    background: var(--color-sand);
+    color: var(--color-brown);
+  }
+  .btn[disabled],
+  .btn[aria-disabled="true"] {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .field {
+    width: 100%;
+    height: 48px;
+    border-radius: var(--radius-field);
+    border: 1px solid var(--color-line);
+    background: #fff;
+    padding-inline: 14px;
+    font-size: 15px;
+    color: var(--color-brown);
+    transition: border-color 0.2s ease;
+  }
+  textarea.field {
+    height: auto;
+    padding-block: 12px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+  .field:hover {
+    border-color: #cdbfb1;
+  }
+  .field:focus-visible {
+    outline: 2px solid var(--color-caramel);
+    outline-offset: 0;
+    border-color: transparent;
+  }
+  .field-soft {
+    background: var(--color-cream);
+  }
+  .label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    flex-shrink: 0;
+    padding-inline: 16px;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: #fff;
+    color: var(--color-brown);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .chip:hover {
+    border-color: var(--color-brown);
+    color: var(--color-brown);
+  }
+  .chip[aria-current="page"],
+  .chip[aria-pressed="true"] {
+    background: var(--color-brown);
+    border-color: var(--color-brown);
+    color: var(--color-cream);
+  }
+
+  .pill-off {
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid var(--color-gold);
+    border-radius: 999px;
+    padding: 1px 8px;
+    line-height: 1.6;
+  }
+
+  .link-underline {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+  }
+  .link-underline:hover {
+    color: var(--color-caramel);
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Arch frame: the signature shape from the designs.
+   * The wrapper is a size container so the top radius is always exactly half the width. */
+  .arch-wrap {
+    container-type: inline-size;
+  }
+  .arch {
+    position: relative;
+    overflow: hidden;
+    border-radius: 50cqw 50cqw var(--arch-b, 16px) var(--arch-b, 16px);
+  }
+  .arch-line {
+    position: absolute;
+    inset: var(--arch-i, 10px);
+    border: 1px solid var(--color-gold);
+    border-radius: calc(50cqw - var(--arch-i, 10px)) calc(50cqw - var(--arch-i, 10px)) 10px 10px;
+    pointer-events: none;
+    z-index: 2;
+  }
+}
+
+/* ───────────────────────── Motion ─────────────────────────
+ * All spatial motion is opt-in under prefers-reduced-motion: no-preference,
+ * so the static state is always the final, fully visible state.
+ */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheen {
+  from {
+    translate: -60% 0;
+  }
+  to {
+    translate: 160% 0;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -6px;
+  }
+}
+@keyframes ping {
+  0% {
+    scale: 1;
+    opacity: 0.55;
+  }
+  100% {
+    scale: 1.7;
+    opacity: 0;
+  }
+}
+@keyframes bump {
+  0%,
+  100% {
+    scale: 1;
+  }
+  40% {
+    scale: 1.35;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Page-load entrance, staggered with --d */
+  .enter {
+    animation: rise 0.8s var(--ease-out-soft) both;
+    animation-delay: var(--d, 0ms);
+  }
+  .enter-fade {
+    animation: fade 1.1s ease both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  /* Gentle drift for floating decorative bits */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Soft light sweep across arch artwork */
+  .sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.45) 50%, transparent 70%);
+    animation: sheen 6.5s ease-in-out 1.2s infinite;
+    pointer-events: none;
+  }
+
+  .ping::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: ping 1.8s ease-out 1.2s 2;
+    z-index: -1;
+  }
+
+  .bump {
+    animation: bump 0.45s ease;
+  }
+
+  /* Scroll reveal: progressive enhancement via scroll-driven animations */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+    .reveal-stagger > * {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+
+  /* Card image zoom */
+  .zoom-img {
+    transition: scale 0.7s var(--ease-out-soft);
+  }
+  .group:hover .zoom-img {
+    scale: 1.04;
+  }
+
+  /* Bottom sheet / dialog entry + exit */
+  dialog.sheet {
+    transition:
+      translate 0.35s var(--ease-out-soft),
+      opacity 0.25s ease,
+      display 0.35s allow-discrete,
+      overlay 0.35s allow-discrete;
+  }
+  dialog.sheet::backdrop {
+    transition:
+      opacity 0.3s ease,
+      display 0.3s allow-discrete,
+      overlay 0.3s allow-discrete;
+  }
+
+  /* Accordion open/close */
+  details.acc::details-content {
+    transition:
+      height 0.3s var(--ease-out-soft),
+      content-visibility 0.3s allow-discrete;
+  }
+
+  /* Route cross-fade (React <ViewTransition>) */
+  ::view-transition-old(.page) {
+    animation: 0.18s ease both reverse fade;
+  }
+  ::view-transition-new(.page) {
+    animation: 0.32s var(--ease-out-soft) 0.06s both rise;
+  }
+  ::view-transition-group(.morph) {
+    animation-duration: 0.45s;
+    animation-timing-function: var(--ease-out-soft);
+  }
+}
+
+/* Sheet geometry (static, motion handled above) */
+dialog.sheet {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-width: 100%;
+  max-height: 100%;
+  width: 100%;
+  inset: auto 0 0 0;
+  background: var(--color-cream);
+  color: var(--color-brown);
+  border-radius: 20px 20px 0 0;
+  opacity: 0;
+  translate: var(--from, 0 100%);
+}
+dialog.sheet.sheet-top {
+  --from: 0 -100%;
+  inset: 0 0 auto 0;
+  border-radius: 0 0 20px 20px;
+}
+dialog.sheet.sheet-left {
+  --from: -100% 0;
+  inset: 0 auto 0 0;
+  height: 100dvh;
+  width: min(420px, 100%);
+  border-radius: 0 20px 20px 0;
+}
+dialog.sheet[open] {
+  opacity: 1;
+  translate: 0 0;
+}
+@starting-style {
+  dialog.sheet[open] {
+    opacity: 0;
+    translate: var(--from, 0 100%);
+  }
+}
+dialog.sheet::backdrop {
+  background: rgb(70 50 41 / 0.38);
+  opacity: 0;
+}
+dialog.sheet[open]::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  dialog.sheet[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+details.acc::details-content {
+  height: 0;
+  overflow: clip;
+}
+details.acc[open]::details-content {
+  height: auto;
+}
+details.acc .acc-icon {
+  transition: rotate 0.25s ease;
+}
+details.acc[open] .acc-icon {
+  rotate: 45deg;
 }
