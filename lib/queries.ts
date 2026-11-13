@@ -550,3 +550,99 @@ export async function getDeliveryZones(): Promise<DeliveryZone[]> {
     position: z.position,
   }));
 }
+
+/* ───────────────────────── Home content ───────────────────────── */
+
+export type HomeContentData = {
+  heroEyebrow: string;
+  heroHeadline: string;
+  heroHeadlineEm: string;
+  heroSubcopy: string;
+  heroImageUrl?: string;
+  primaryCtaLabel: string;
+  primaryCtaHref: string;
+  secondaryCtaLabel: string;
+  secondaryCtaHref: string;
+  flowerHeadline: string;
+  flowerCopy: string;
+  flowerImageUrl?: string;
+  steps: { title: string; text: string }[];
+  seasonal?: { headline: string; imageUrl?: string; from: string; to: string };
+};
+
+export type HomeReview = { id: string; imageUrl?: string; caption: string; sortOrder: number };
+export type HomeSocialTile = { id: string; label: string; href: string; imageUrl?: string; sortOrder: number };
+
+/**
+ * Everything editable on the home page. `seasonalActive` is evaluated when the
+ * cache entry is written (cacheLife hours), so a seasonal window starts/ends
+ * within an hour without a redeploy.
+ */
+export async function getHomeContent(): Promise<HomeContentData & { seasonalActive: boolean }> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("home");
+  const row = await db.homeContent.findUnique({ where: { id: 1 } });
+  if (!row) {
+    return {
+      heroEyebrow: "Handmade resin studio · Pakistan",
+      heroHeadline: "Keepsakes, poured",
+      heroHeadlineEm: "by hand.",
+      heroSubcopy: "Nikkah trays, jewellery and preserved flowers, each piece made one at a time by Ash.",
+      primaryCtaLabel: "Shop now",
+      primaryCtaHref: "/shop",
+      secondaryCtaLabel: "Make it custom",
+      secondaryCtaHref: "/custom",
+      flowerHeadline: "Your wedding flowers, kept for good.",
+      flowerCopy: "",
+      steps: [],
+      seasonalActive: false,
+    };
+  }
+
+  const now = Date.now();
+  const seasonal =
+    row.seasonalHeadline && row.seasonalFrom && row.seasonalTo
+      ? {
+          headline: row.seasonalHeadline,
+          imageUrl: row.seasonalImageUrl ?? undefined,
+          from: row.seasonalFrom.toISOString(),
+          to: row.seasonalTo.toISOString(),
+        }
+      : undefined;
+  const seasonalActive = !!seasonal && now >= Date.parse(seasonal.from) && now <= Date.parse(seasonal.to);
+
+  return {
+    heroEyebrow: row.heroEyebrow,
+    heroHeadline: row.heroHeadline,
+    heroHeadlineEm: row.heroHeadlineEm,
+    heroSubcopy: row.heroSubcopy,
+    heroImageUrl: row.heroImageUrl ?? undefined,
+    primaryCtaLabel: row.primaryCtaLabel,
+    primaryCtaHref: row.primaryCtaHref,
+    secondaryCtaLabel: row.secondaryCtaLabel,
+    secondaryCtaHref: row.secondaryCtaHref,
+    flowerHeadline: row.flowerHeadline,
+    flowerCopy: row.flowerCopy,
+    flowerImageUrl: row.flowerImageUrl ?? undefined,
+    steps: (row.steps as { title: string; text: string }[]) ?? [],
+    seasonal,
+    seasonalActive,
+  };
+}
+
+export async function getHomeReviews(): Promise<HomeReview[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("home");
+  const rows = await db.review.findMany({ where: { published: true }, orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] });
+  return rows.map((r) => ({ id: r.id, imageUrl: r.imageUrl ?? undefined, caption: r.caption, sortOrder: r.sortOrder }));
+}
+
+export async function getHomeSocialTiles(): Promise<HomeSocialTile[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("home");
+  const rows = await db.socialTile.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] });
+  return rows.map((r) => ({ id: r.id, label: r.label, href: r.href, imageUrl: r.imageUrl ?? undefined, sortOrder: r.sortOrder }));
+}

@@ -1,4 +1,3 @@
-import { ViewTransition } from "react";
 import { Footer, Header, WhatsAppFab } from "@/components/store/chrome";
 import { JsonLd } from "@/components/ui";
 import { getCategoryTree, getProducts } from "@/lib/queries";
@@ -59,11 +58,9 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
         ]}
       />
       <Header searchItems={searchItems} />
-      <ViewTransition default="page">
-        <main id="main" className="min-h-[60vh]">
-          {children}
-        </main>
-      </ViewTransition>
+      <main id="main" className="min-h-[60vh]">
+        {children}
+      </main>
       <Footer shopLinks={shopLinks} />
       <WhatsAppFab />
     </>

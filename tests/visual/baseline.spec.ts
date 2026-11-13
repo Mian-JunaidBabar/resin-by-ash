@@ -21,6 +21,7 @@ const STOREFRONT: [name: string, path: string][] = [
 const ADMIN: [name: string, path: string][] = [
   ["admin-login", "/admin/login"],
   ["admin-dashboard", "/admin"],
+  ["admin-home", "/admin/home"],
   ["admin-orders", "/admin/orders"],
   ["admin-order-detail", "/admin/orders/RBA-1042"],
   ["admin-products", "/admin/products"],
@@ -40,6 +41,9 @@ for (const [name, path] of [...STOREFRONT, ...ADMIN]) {
       await page.reload();
     }
     await settle(page);
+    // Sticky sidebars render at the scroll position of a full-page capture and
+    // make admin screenshots flaky. Freeze them in their natural flow position.
+    await page.addStyleTag({ content: ".lg\\:sticky { position: static !important; }" });
     await expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
   });
 }

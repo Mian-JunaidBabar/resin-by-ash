@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { TrustRow } from "@/components/store/chrome";
 import { Carousel } from "@/components/store/carousel";
 import { ArchFrame, Eyebrow, ProductCard, ResinArt, SectionHead } from "@/components/ui";
 import { TONES } from "@/lib/data/catalog";
-import { getBestSellers, getCategories, getLatest } from "@/lib/queries";
+import {
+  getBestSellers,
+  getCategoryTree,
+  getHomeContent,
+  getHomeReviews,
+  getHomeSocialTiles,
+  getLatest,
+} from "@/lib/queries";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -14,60 +22,87 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-const STEPS = [
-  { n: 1, title: "Share your idea", text: "Names, date, colours and a few photos, sent on WhatsApp." },
-  { n: 2, title: "Design + quote", text: "Ash sketches it out and confirms the price." },
-  { n: 3, title: "Progress photo", text: "See your piece before it is finished." },
-  { n: 4, title: "Delivered", text: "Cash on Delivery anywhere in Pakistan." },
+const FALLBACK_STEPS = [
+  { title: "Share your idea", text: "Names, date, colours and a few photos, sent on WhatsApp." },
+  { title: "Design + quote", text: "Ash sketches it out and confirms the price." },
+  { title: "Progress photo", text: "See your piece before it is finished." },
+  { title: "Delivered", text: "Cash on Delivery anywhere in Pakistan." },
 ];
 
-const SOCIAL = [
-  { label: "Reel", href: SITE.instagram, tone: TONES.blush },
-  { label: "TikTok", href: SITE.tiktok, tone: TONES.gold },
-  { label: "Post", href: SITE.instagram, tone: TONES.ivory },
-  { label: "TikTok", href: SITE.tiktok, tone: TONES.ocean },
-  { label: "Reel", href: SITE.instagram, tone: TONES.rose },
-  { label: "Post", href: SITE.instagram, tone: TONES.sage },
-];
+const SOCIAL_TONES = [TONES.blush, TONES.gold, TONES.ivory, TONES.ocean, TONES.rose, TONES.sage];
+
+function splitHeadline(headline: string): [string, string?] {
+  const i = headline.lastIndexOf(", ");
+  if (i === -1) return [headline];
+  return [headline.slice(0, i + 1), headline.slice(i + 2)];
+}
 
 export default async function HomePage() {
-  const [cats, latest, best] = await Promise.all([getCategories(), getLatest(8), getBestSellers(8)]);
+  const [content, cats, latest, best, reviews, social] = await Promise.all([
+    getHomeContent(),
+    getCategoryTree(),
+    getLatest(8),
+    getBestSellers(8),
+    getHomeReviews(),
+    getHomeSocialTiles(),
+  ]);
+
   const tiles = [
-    ...cats.filter((c) => c.showOnHome).map((c) => ({ name: c.name, href: `/shop/${c.slug}`, tone: c.tone, seed: c.slug })),
-    { name: "Custom Orders", href: "/custom", tone: "#ECE5DE", seed: "custom" },
-  ].slice(0, 6);
+    ...cats
+      .filter((c) => c.showOnHome)
+      .slice(0, 5)
+      .map((c) => ({ name: c.name, href: `/shop/${c.slug}`, tone: c.tone, seed: c.slug, image: c.image })),
+    { name: "Custom Orders", href: "/custom", tone: "#ECE5DE", seed: "custom", image: undefined },
+  ];
+  const steps = (content.steps.length ? content.steps : FALLBACK_STEPS).map((s, i) => ({ ...s, n: i + 1 }));
+
+  const seasonal = content.seasonalActive && content.seasonal;
+  const headline = seasonal ? seasonal.headline : content.heroHeadline;
+  const headlineEm = seasonal ? undefined : content.heroHeadlineEm;
+  const heroImage = (seasonal ? seasonal.imageUrl : content.heroImageUrl) ?? undefined;
+  const [flowerStart, flowerEm] = splitHeadline(content.flowerHeadline);
 
   return (
     <>
       {/* ───── Hero ───── */}
       <section className="wrap grid items-center gap-7 pt-7 pb-10 lg:grid-cols-2 lg:gap-20 lg:pt-16 lg:pb-[72px]">
         <div className="flex max-w-[520px] flex-col gap-3.5 lg:gap-[22px]">
-          <Eyebrow line className="enter" >
-            Handmade resin studio · Pakistan
+          <Eyebrow line className="enter">
+            {seasonal ? "Wedding season" : content.heroEyebrow}
           </Eyebrow>
           <h1
-            className="enter font-display text-[46px] leading-[1.04] font-medium tracking-[-0.01em] lg:text-[84px] lg:leading-[0.98] lg:tracking-[-0.015em]"
+            className="enter-rise font-display text-[46px] leading-[1.04] font-medium tracking-[-0.01em] lg:text-[84px] lg:leading-[0.98] lg:tracking-[-0.015em]"
             style={{ ["--d" as string]: "80ms" }}
           >
-            Keepsakes, poured <em>by hand.</em>
+            {headline} {headlineEm ? <em>{headlineEm}</em> : null}
           </h1>
           <p className="enter text-[15px] leading-relaxed lg:max-w-[440px] lg:text-lg lg:leading-[1.65]" style={{ ["--d" as string]: "160ms" }}>
-            Nikkah trays, jewellery and preserved flowers, each piece made one at a time by Ash.
+            {content.heroSubcopy}
           </p>
           <div className="enter mt-1.5 flex gap-2.5 lg:mt-2.5 lg:gap-3.5" style={{ ["--d" as string]: "240ms" }}>
-            <Link href="/shop" className="btn btn-primary flex-1 lg:flex-none">
-              Shop now
+            <Link href={content.primaryCtaHref} className="btn btn-primary flex-1 lg:flex-none">
+              {content.primaryCtaLabel}
             </Link>
-            <Link href="/custom" className="btn btn-outline flex-1 lg:flex-none">
-              Make it custom
+            <Link href={content.secondaryCtaHref} className="btn btn-outline flex-1 lg:flex-none">
+              {content.secondaryCtaLabel}
             </Link>
           </div>
         </div>
         <div className="enter-fade flex justify-center" style={{ ["--d" as string]: "120ms" }}>
-          {/* Hero photo slot (nikkah tray, 4:5). Replace ResinArt with <Image priority> when photos arrive. */}
           <ArchFrame className="h-[438px] w-full lg:h-[588px] lg:w-[470px]" inset={10} sheen>
             <div className="absolute inset-0">
-              <ResinArt seed="hero-nikkah-tray" tone={["#F6F2ED", TONES.gold]} />
+              {heroImage ? (
+                <Image
+                  src={heroImage}
+                  alt={headline}
+                  fill
+                  priority
+                  sizes="(min-width: 1024px) 470px, 100vw"
+                  className="object-cover"
+                />
+              ) : (
+                <ResinArt seed={seasonal ? "seasonal-hero" : "hero-nikkah-tray"} tone={["#F6F2ED", TONES.gold]} />
+              )}
             </div>
             <span aria-hidden="true" className="float absolute top-[22%] left-[18%] h-2 w-2 rounded-full bg-gold/70" />
             <span
@@ -100,7 +135,11 @@ export default async function HomePage() {
                 line="none"
               >
                 <div className="zoom-img absolute inset-0 opacity-80">
-                  <ResinArt seed={t.seed} tone={[t.tone, TONES.blush]} />
+                  {t.image ? (
+                    <Image src={t.image} alt="" fill sizes="(min-width: 1024px) 225px, 30vw" className="object-cover" />
+                  ) : (
+                    <ResinArt seed={t.seed} tone={[t.tone, TONES.blush]} />
+                  )}
                 </div>
               </ArchFrame>
               <span className="text-[13px] leading-tight font-medium transition-colors group-hover:text-caramel lg:text-[15px]">
@@ -170,7 +209,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <ol className="reveal-stagger grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-5">
-            {STEPS.map((s) => (
+            {steps.map((s) => (
               <li
                 key={s.n}
                 className="flex flex-col gap-2 rounded-[14px] bg-cream p-4 transition-shadow duration-300 hover:shadow-[var(--shadow-lift)] lg:gap-3 lg:rounded-2xl lg:p-[26px]"
@@ -193,18 +232,25 @@ export default async function HomePage() {
       <section className="wrap grid items-center gap-5 py-12 lg:grid-cols-2 lg:gap-20 lg:py-[88px]">
         <ArchFrame className="reveal h-[300px] w-full lg:h-[500px]" bg="#ECE5DE" inset={14} line="lg">
           <div className="absolute inset-0">
-            <ResinArt seed="bouquet-block" tone={["#ECE5DE", TONES.rose]} />
+            {content.flowerImageUrl ? (
+              <Image
+                src={content.flowerImageUrl}
+                alt={content.flowerHeadline}
+                fill
+                sizes="(min-width: 1024px) 600px, 100vw"
+                className="object-cover"
+              />
+            ) : (
+              <ResinArt seed="bouquet-block" tone={["#ECE5DE", TONES.rose]} />
+            )}
           </div>
         </ArchFrame>
         <div className="reveal flex max-w-[500px] flex-col gap-5 lg:gap-[22px]">
           <span className="eyebrow">Flower preservation</span>
           <h2 className="font-display text-[34px] leading-[1.08] font-medium lg:text-[52px] lg:leading-[1.02]">
-            Your wedding flowers, <em>kept for good.</em>
+            {flowerStart} {flowerEm ? <em>{flowerEm}</em> : null}
           </h2>
-          <p className="text-[15px] leading-relaxed lg:text-[17px] lg:leading-[1.65]">
-            Bridal bouquets, nikkah garlands, a single rose from the day. Ash dries them gently and sets them in clear
-            resin, as blocks, frames, clocks or jewellery.
-          </p>
+          <p className="text-[15px] leading-relaxed lg:text-[17px] lg:leading-[1.65]">{content.flowerCopy}</p>
           <div className="flex gap-2.5 lg:mt-1.5 lg:gap-3.5">
             <Link href="/custom?item=flower-preservation" className="btn btn-primary flex-1 lg:flex-none">
               Preserve my flowers
@@ -223,17 +269,20 @@ export default async function HomePage() {
           slideClass="w-[210px] lg:w-[250px]"
           head={<SectionHead eyebrow="Kind words" title="Straight from the chats" className="flex-1" />}
         >
-          {[1, 2, 3, 4, 5, 6].map((n) => (
-            <figure key={n} className="m-0 flex flex-col gap-2.5 lg:gap-3">
-              {/* TODO(client): replace with screenshots from the Instagram "reviews" highlight */}
-              <div className="flex h-[370px] items-center justify-center rounded-[20px] border border-line bg-cream p-5 text-center lg:h-[440px] lg:rounded-[22px]">
-                <span className="text-[11px] leading-relaxed tracking-[0.1em] uppercase">
-                  WhatsApp chat
-                  <br />
-                  screenshot {n}
-                </span>
+          {reviews.map((r) => (
+            <figure key={r.id} className="m-0 flex flex-col gap-2.5 lg:gap-3">
+              <div className="relative flex h-[370px] items-center justify-center overflow-hidden rounded-[20px] border border-line bg-cream p-5 text-center lg:h-[440px] lg:rounded-[22px]">
+                {r.imageUrl ? (
+                  <Image src={r.imageUrl} alt={`Review from ${r.caption}`} fill sizes="(min-width: 1024px) 250px, 210px" className="object-cover" />
+                ) : (
+                  <span className="text-[11px] leading-relaxed tracking-[0.1em] uppercase">
+                    WhatsApp chat
+                    <br />
+                    screenshot
+                  </span>
+                )}
               </div>
-              <figcaption className="text-[13px] lg:text-sm">[Customer first name], [city]</figcaption>
+              <figcaption className="text-[13px] lg:text-sm">{r.caption}</figcaption>
             </figure>
           ))}
         </Carousel>
@@ -258,9 +307,9 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="reveal-stagger grid grid-cols-3 gap-1.5 lg:grid-cols-6 lg:gap-3">
-          {SOCIAL.map((t, i) => (
+          {social.map((t, i) => (
             <a
-              key={i}
+              key={t.id}
               href={t.href}
               target="_blank"
               rel="noopener"
@@ -268,7 +317,11 @@ export default async function HomePage() {
               className="group relative flex aspect-[4/5] items-end overflow-hidden rounded-[10px] p-2 text-brown no-underline lg:rounded-xl lg:p-3"
             >
               <span className="zoom-img absolute inset-0">
-                <ResinArt seed={`social-${i}`} tone={["#F1EBE4", t.tone]} />
+                {t.imageUrl ? (
+                  <Image src={t.imageUrl} alt="" fill sizes="(min-width: 1024px) 16vw, 30vw" className="object-cover" />
+                ) : (
+                  <ResinArt seed={`social-${i}`} tone={["#F1EBE4", SOCIAL_TONES[i % SOCIAL_TONES.length]]} />
+                )}
               </span>
               <span className="relative text-[9px] tracking-[0.1em] uppercase lg:text-[10px]">{t.label}</span>
             </a>

@@ -46,9 +46,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npm run build && npm run start -- -p ${PORT}`,
+    command: `rm -rf .next && npm run build && npm run start -- -p ${PORT}`,
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 240_000,
     env: {
       DATABASE_URL: testDatabaseUrl ?? "",

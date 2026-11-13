@@ -4,7 +4,11 @@ import type { Page } from "@playwright/test";
 export async function settle(page: Page) {
   await page.waitForLoadState("networkidle");
   await page.evaluate(async () => {
-    await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 5000))]);
+    await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 20_000))]);
+    for (const face of document.fonts) {
+      if (face.status !== "loaded") await face.load().catch(() => {});
+    }
+    await document.fonts.ready;
   });
   // Scroll through the page so lazy images load and scroll-driven reveals finish.
   await page.evaluate(async () => {
