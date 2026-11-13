@@ -25,7 +25,7 @@ const ADMIN: [name: string, path: string][] = [
   ["admin-orders", "/admin/orders"],
   ["admin-order-detail", "/admin/orders/RBA-1042"],
   ["admin-products", "/admin/products"],
-  ["admin-product-edit", "/admin/products/p_001"],
+  ["admin-product-edit", "/admin/products/gold-leaf-nikkah-tray-pen-set"],
   ["admin-product-new", "/admin/products/new"],
   ["admin-categories", "/admin/categories"],
   ["admin-requests", "/admin/requests"],

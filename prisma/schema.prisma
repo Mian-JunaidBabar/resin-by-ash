@@ -122,6 +122,8 @@ model ProductImage {
   productId String
   url       String
   alt       String?
+  width     Int?
+  height    Int?
   isVideo   Boolean @default(false)
   position  Int     @default(0)
 

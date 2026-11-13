@@ -49,3 +49,6 @@ next-env.d.ts
 /extras
 # prisma generated client
 /lib/generated
+
+# locally uploaded catalogue media
+/.uploads/
