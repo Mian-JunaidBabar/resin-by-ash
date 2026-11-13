@@ -13,6 +13,7 @@ export default defineConfig({
     include: ["tests/unit/**/*.test.ts"],
     passWithNoTests: true,
     setupFiles: ["tests/unit/setup.ts"],
+    globalSetup: ["tests/unit/global-setup.ts"],
     coverage: {
       provider: "v8",
       include: ["lib/**/*.ts", "app/**/*.ts"],
