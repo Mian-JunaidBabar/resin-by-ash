@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import type { Metadata } from "next";
 import { SearchIcon } from "@/components/icons";
 import { PageTitle, Pill, abtnChat, abtnGhost } from "@/components/admin/ui";
@@ -8,7 +9,8 @@ import { waLink } from "@/lib/whatsapp";
 export const metadata: Metadata = { title: "Customers" };
 
 /** Customers are built from orders (upsert by phone). Phase 2: search + pagination on the server, CSV export route. */
-export default function CustomersPage() {
+export default async function CustomersPage() {
+  await requireAdmin();
   return (
     <>
       <PageTitle

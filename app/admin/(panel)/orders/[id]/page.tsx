@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import type { Metadata } from "next";
 import { OrderDetail } from "@/components/admin/order-detail";
 import { ORDER_ROWS, SAMPLE_ORDER } from "@/lib/data/admin";
@@ -13,6 +14,7 @@ export async function generateMetadata({ params }: PageProps<"/admin/orders/[id]
 
 /** Phase 2: load the order by id from the database (behind auth) and notFound() when missing. */
 export default async function OrderPage({ params }: PageProps<"/admin/orders/[id]">) {
+  await requireAdmin();
   const { id } = await params;
   const row = ORDER_ROWS.find((o) => o.id === id);
   const order = row && row.id !== SAMPLE_ORDER.id

@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductForm } from "@/components/admin/product-form";
@@ -13,6 +14,7 @@ export async function generateMetadata({ params }: PageProps<"/admin/products/[i
 }
 
 export default async function EditProductPage({ params }: PageProps<"/admin/products/[id]">) {
+  await requireAdmin();
   const { id } = await params;
   const product = id === "new" ? undefined : PRODUCTS.find((p) => p.id === id);
   if (id !== "new" && !product) notFound();

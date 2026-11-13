@@ -4,6 +4,7 @@ import { revalidateTag, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 
 const text = z.string().trim().max(400);
 const longText = z.string().trim().max(2000);
@@ -38,6 +39,7 @@ function day(value: string, end = false): Date | null {
 }
 
 export async function saveHome(formData: FormData) {
+  await requireAdmin();
   const parsed = homeSchema.safeParse({
     heroEyebrow: iso(formData.get("heroEyebrow")),
     heroHeadline: iso(formData.get("heroHeadline")),
@@ -156,12 +158,14 @@ async function swap(kind: "review" | "social", id: string, direction: "up" | "do
 }
 
 export async function moveReview(formData: FormData) {
+  await requireAdmin();
   const [id, direction] = String(formData.get("move") ?? "").split(":");
   if (id && (direction === "up" || direction === "down")) await swap("review", id, direction);
   redirect("/admin/home");
 }
 
 export async function moveSocial(formData: FormData) {
+  await requireAdmin();
   const [id, direction] = String(formData.get("move") ?? "").split(":");
   if (id && (direction === "up" || direction === "down")) await swap("social", id, direction);
   redirect("/admin/home");

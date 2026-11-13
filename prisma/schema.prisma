@@ -286,6 +286,19 @@ model Session {
   @@index([userId])
 }
 
+/// One-time admin invite link (24 hours).
+model Invite {
+  id        String    @id @default(cuid())
+  email     String
+  role      AdminRole @default(DEVELOPER)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+}
+
 model LoginAttempt {
   id        String   @id @default(cuid())
   key       String // ip|email

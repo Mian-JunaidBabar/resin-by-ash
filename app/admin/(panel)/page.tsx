@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PlusIcon } from "@/components/icons";
@@ -9,7 +10,8 @@ import { waLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  await requireAdmin();
   const top = [...PRODUCTS].sort((a, b) => b.soldCount - a.soldCount).slice(0, 4);
   return (
     <>

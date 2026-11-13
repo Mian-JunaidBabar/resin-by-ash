@@ -31,10 +31,18 @@ const ADMIN: [name: string, path: string][] = [
   ["admin-requests", "/admin/requests"],
   ["admin-customers", "/admin/customers"],
   ["admin-settings", "/admin/settings"],
+  ["admin-users", "/admin/settings/users"],
 ];
 
 for (const [name, path] of [...STOREFRONT, ...ADMIN]) {
   test(`${name} matches the visual baseline`, async ({ page }) => {
+    if (name.startsWith("admin") && name !== "admin-login") {
+      await page.goto("/admin/login");
+      await page.fill('input[name="email"]', process.env.ADMIN_EMAIL ?? "ash@resinbyash.pk");
+      await page.fill('input[name="password"]', process.env.ADMIN_PASSWORD ?? "studio-pass-2026");
+      await page.getByRole("button", { name: "Sign in" }).click();
+      await page.waitForURL(/\/admin$/);
+    }
     await page.goto(path);
     if (name === "thank-you") {
       await page.evaluate((order) => sessionStorage.setItem("rba-last-order", JSON.stringify(order)), LAST_ORDER);

@@ -1,4 +1,7 @@
+import { requireAdmin } from "@/lib/auth";
+import { db } from "@/lib/db";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Card, PageTitle, Toggle, abtnGhost, abtnPrimary, afield } from "@/components/admin/ui";
 import { DELIVERY_ZONES } from "@/lib/delivery";
 import { SITE } from "@/lib/site";
@@ -12,7 +15,9 @@ Name: {name} · City: {city}
 Address: {address}`;
 
 /** Phase 2: one Settings row in the database; saveSettings server action; storefront reads it via lib/queries.ts. */
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  await requireAdmin();
+  const users = await db.adminUser.findMany({ orderBy: { createdAt: "asc" }, select: { id: true, name: true, email: true, role: true } });
   return (
     <form className="flex flex-col gap-6">
       <PageTitle
@@ -104,23 +109,22 @@ export default function SettingsPage() {
         <Card
           title="Admin users"
           action={
-            <button type="button" className={`${abtnGhost} !h-9 !text-[13px]`}>
-              Invite
-            </button>
+            <Link href="/admin/settings/users" className={`${abtnGhost} !h-9 !text-[13px]`}>
+              Manage
+            </Link>
           }
         >
-          {[
-            { i: "A", name: "Ash", role: "Owner" },
-            { i: "D", name: "Deep Dev Solutions", role: "Developer · support access" },
-          ].map((u) => (
-            <div key={u.name} className="flex items-center gap-3">
+          {users.map((u) => (
+            <div key={u.id} className="flex items-center gap-3">
               <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-full bg-sand text-sm font-bold">
-                {u.i}
+                {u.name.slice(0, 1).toUpperCase()}
               </span>
               <span className="text-sm">
                 <strong className="font-semibold">{u.name}</strong>
                 <br />
-                <span className="text-xs text-cocoa">{u.role}</span>
+                <span className="text-xs text-cocoa">
+                  {u.email} · {u.role === "OWNER" ? "Owner" : "Developer"}
+                </span>
               </span>
             </div>
           ))}

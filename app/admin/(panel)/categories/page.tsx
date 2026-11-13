@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import type { Metadata } from "next";
 import { DragIcon, UploadIcon } from "@/components/icons";
 import { Card, PageTitle, Thumb, abtnGhost, abtnPrimary, afield } from "@/components/admin/ui";
@@ -6,7 +7,8 @@ import { CATEGORIES, PRODUCTS } from "@/lib/data/catalog";
 export const metadata: Metadata = { title: "Categories" };
 
 /** Phase 2: drag-to-reorder saves sortOrder; "Show on home" toggles showOnHome; both revalidateTag("categories"). */
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  await requireAdmin();
   return (
     <>
       <PageTitle title="Categories" sub="Drag to set the order they appear in the shop and on the home page." />

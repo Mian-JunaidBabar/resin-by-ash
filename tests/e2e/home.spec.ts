@@ -37,6 +37,11 @@ test("reviews come from the database", async ({ page }) => {
 });
 
 test("admin edits the hero headline and the home page updates without a deploy", async ({ page }) => {
+  await page.goto("/admin/login");
+  await page.fill('input[name="email"]', process.env.ADMIN_EMAIL ?? "ash@resinbyash.pk");
+  await page.fill('input[name="password"]', process.env.ADMIN_PASSWORD ?? "studio-pass-2026");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
   await page.goto("/admin/home");
   await page.locator("#home-form").waitFor();
   const headline = page.locator('input[name="heroHeadline"]');

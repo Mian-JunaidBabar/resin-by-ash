@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "@/app/admin/(panel)/auth-actions";
 
 const LINKS = [
   { label: "Dashboard", href: "/admin" },
@@ -54,9 +55,11 @@ export function AdminSidebar() {
         <Link href="/" className="text-[13px] font-medium underline underline-offset-[3px]">
           View store
         </Link>
-        <Link href="/admin/login" className="text-[13px] font-medium text-cocoa no-underline hover:text-caramel">
-          Sign out
-        </Link>
+        <form action={signOut}>
+          <button type="submit" className="text-[13px] font-medium text-cocoa hover:text-caramel">
+            Sign out
+          </button>
+        </form>
       </div>
     </nav>
   );

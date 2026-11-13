@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Card, PageTitle, abtn, abtnGhost, abtnPrimary, afield } from "@/components/admin/ui";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 import { moveReview, moveSocial, saveHome } from "./actions";
 
 export const metadata: Metadata = { title: "Home page" };
@@ -36,6 +37,7 @@ export default function AdminHomePage() {
 }
 
 async function AdminHomeContent() {
+  await requireAdmin();
   const [content, reviews, social] = await Promise.all([
     db.homeContent.findUnique({ where: { id: 1 } }),
     db.review.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] }),
