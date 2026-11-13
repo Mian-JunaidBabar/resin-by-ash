@@ -1,0 +1,41 @@
+name: Database backup
+
+on:
+  schedule:
+    # 02:15 UTC every day (07:15 in Pakistan).
+    - cron: "15 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dump the production database
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "Add PRODUCTION_DATABASE_URL to the repository secrets first." >&2
+            exit 1
+          fi
+          mkdir -p backups
+          docker run --rm \
+            --env DATABASE_URL \
+            --env BACKUP_DIR=/backups \
+            -v "$PWD/backups:/backups" \
+            -v "$PWD/scripts:/scripts:ro" \
+            postgres:17 \
+            bash /scripts/backup-db.sh
+
+      - name: Keep the dump for 14 days
+        uses: actions/upload-artifact@v4
+        with:
+          name: resin-by-ash-db-${{ github.run_id }}
+          path: backups/*.dump
+          retention-days: 14
+          if-no-files-found: error

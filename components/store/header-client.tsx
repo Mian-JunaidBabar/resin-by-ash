@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { BagIcon, CloseIcon, InstagramIcon, MenuIcon, SearchIcon, TikTokIcon, WhatsAppIcon } from "@/components/icons";
 import { ResinArt } from "@/components/ui";
+import { track } from "@/lib/analytics";
 import { useCartCount } from "@/lib/cart";
 import { rs } from "@/lib/pricing";
 import { NAV_LINKS, SITE } from "@/lib/site";
@@ -186,6 +187,7 @@ export function SearchButton({ items }: { items: SearchItem[] }) {
           className="wrap flex flex-col gap-4 py-5 lg:py-8"
           onSubmit={(e) => {
             e.preventDefault();
+            if (q.trim()) track("search", { search_term: q.trim() });
             close();
             router.push(`/shop?q=${encodeURIComponent(q.trim())}`);
           }}

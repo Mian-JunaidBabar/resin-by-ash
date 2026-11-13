@@ -16,7 +16,7 @@
   /* Ink */
   --color-brown: #463229; /* text, footer, selected chips */
   --color-cocoa: #7a6455; /* secondary text, meta */
-  --color-muted: #9a8f8c; /* struck-through prices */
+  --color-muted: #7a6b68; /* struck-through prices, meets 4.5:1 on cream */
 
   /* Accents */
   --color-caramel: #9e6842; /* primary CTA */

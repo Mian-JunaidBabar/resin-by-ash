@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { uploadReferenceImage } from "@/app/(store)/actions";
 import { BagIcon, CheckIcon, ClockIcon, UploadIcon, WhatsAppIcon } from "@/components/icons";
+import { track, trackAddToCart, trackItem } from "@/lib/analytics";
 import { cart } from "@/lib/cart";
 import { rs, variantPrice } from "@/lib/pricing";
 import type { Personalisation, Product } from "@/lib/types";
@@ -28,6 +29,11 @@ export function ProductPurchase({ product, whatsappNumber }: { product: Product;
   const price = variantPrice(product, size, colour);
   const total = price.price * qty;
   const has = (f: Product["personalisation"][number]) => product.personalisation.includes(f);
+
+  // Fire once when the product page opens, after the visitor's analytics choice.
+  useEffect(() => {
+    trackItem(product, price.price);
+  }, [product, price.price]);
 
   const set = (k: keyof Personalisation, v: string) => {
     setAdded(false);
@@ -57,6 +63,7 @@ export function ProductPurchase({ product, whatsappNumber }: { product: Product;
       tone: product.tone,
       image: product.images[0],
     });
+    trackAddToCart(product, price.price, qty);
     setAdded(true);
   };
 
@@ -244,7 +251,13 @@ export function ProductPurchase({ product, whatsappNumber }: { product: Product;
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <a href={waLink(msg, whatsappNumber)} target="_blank" rel="noopener" className="btn btn-primary !h-[54px] !text-base">
+        <a
+          href={waLink(msg, whatsappNumber)}
+          target="_blank"
+          rel="noopener"
+          onClick={() => track("begin_checkout", { currency: "PKR", value: total, item_id: product.id })}
+          className="btn btn-primary !h-[54px] !text-base"
+        >
           <WhatsAppIcon size={20} />
           Order on WhatsApp · {rs(total)}
         </a>

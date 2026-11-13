@@ -35,7 +35,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       url: `/product/${p.slug}`,
       title: `${p.name} · ${SITE.name}`,
       description,
-      images: p.images[0] ? [{ url: p.images[0], width: 1200, height: 1500, alt: p.name }] : undefined,
     },
     other: {
       "product:price:amount": String(price.price),
@@ -121,7 +120,7 @@ async function ProductContent({ params }: { params: Params }) {
         <div className="flex flex-col">
           <section className="flex flex-col gap-3 px-5 pt-[22px] md:px-10 lg:px-0 lg:pt-0">
             <Breadcrumbs items={crumbs} />
-            <h1 className="enter font-display text-4xl leading-[1.05] font-medium lg:text-5xl">{product.name}</h1>
+            <h1 className="font-display text-4xl leading-[1.05] font-medium lg:text-5xl">{product.name}</h1>
             <p className="text-[15px] leading-relaxed lg:text-base">{product.description}</p>
           </section>
 

@@ -203,9 +203,10 @@ async function Results({
           <p className="wrap -mt-1 mb-4 text-[13px] text-cocoa lg:mt-6 lg:mb-0 lg:text-sm">
             {total} {total === 1 ? "piece" : "pieces"}
           </p>
+          <h2 className="sr-only">Pieces</h2>
           <div className="wrap grid grid-cols-2 gap-x-3.5 gap-y-[26px] lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10 lg:pt-6">
             {items.map((p, i) => (
-              <div key={p.id} className={i >= (page - 1) * 12 ? "enter" : ""} style={{ ["--d" as string]: `${(i % 12) * 40}ms` }}>
+              <div key={p.id}>
                 <ProductCard product={p} badge="custom" morph priority={i < 2} />
               </div>
             ))}

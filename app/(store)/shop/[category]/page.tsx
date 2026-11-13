@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
-import { ShopView } from "@/components/store/shop-view";
 import { ShopPageSkeleton } from "@/components/store/shop-skeleton";
+import { ShopView } from "@/components/store/shop-view";
 import { getCategories, getCategoryByPath, getCategoryRedirect, getCategoryStaticParams } from "@/lib/queries";
 import { absoluteUrl } from "@/lib/site";
 import type { Category } from "@/lib/types";

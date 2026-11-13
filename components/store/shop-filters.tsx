@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { CloseIcon, FilterIcon, SearchIcon } from "@/components/icons";
+import { track } from "@/lib/analytics";
 import { rs } from "@/lib/pricing";
 
 /**
@@ -71,6 +72,7 @@ export function ShopFilters(props: Props) {
   }
 
   const push = (next: Partial<FilterState>) => {
+    if (next.q) track("search", { search_term: next.q });
     const qs = toParams({ ...state, ...next });
     start(() => router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false }));
   };
@@ -400,6 +402,7 @@ export function DesktopSearch({ initial }: { initial?: string }) {
   useEffect(() => {
     const t = setTimeout(() => {
       if ((initial ?? "") === q.trim()) return;
+      if (q.trim()) track("search", { search_term: q.trim() });
       const p = new URLSearchParams(window.location.search);
       if (q.trim()) p.set("q", q.trim());
       else p.delete("q");

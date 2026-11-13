@@ -3,6 +3,7 @@
 import { useId, useState, useSyncExternalStore, useTransition } from "react";
 import { submitCustomRequest, uploadReferenceImage } from "@/app/(store)/actions";
 import { UploadIcon, WhatsAppIcon } from "@/components/icons";
+import { track } from "@/lib/analytics";
 import { TONES } from "@/lib/data/catalog";
 
 const ITEMS = [
@@ -61,6 +62,7 @@ export function CustomForm() {
       }
       if (tab) tab.location.href = res.waUrl;
       else window.location.href = res.waUrl;
+      track("custom_request_sent", { item });
       setSent(true);
     });
   };

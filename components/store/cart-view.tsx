@@ -8,6 +8,7 @@ import { CloseIcon, GiftIcon, WhatsAppIcon } from "@/components/icons";
 import { ArchFrame, ResinArt } from "@/components/ui";
 import { cart, saveLastOrder, useCart, useHydrated } from "@/lib/cart";
 import type { DeliveryZone } from "@/lib/types";
+import { track } from "@/lib/analytics";
 import { rs } from "@/lib/pricing";
 import { lineOptions, personalisationSummary } from "@/lib/whatsapp";
 
@@ -86,6 +87,8 @@ export function CartView({ zones }: { zones: DeliveryZone[] }) {
         waUrl: res.waUrl,
         message: res.message,
       });
+      track("begin_checkout", { currency: "PKR", value: res.total, items: lines.length });
+      track("place_order_whatsapp", { currency: "PKR", value: res.total, transaction_id: res.orderId });
       setPlaced(true);
       if (tab) tab.location.href = res.waUrl;
       else window.location.href = res.waUrl;

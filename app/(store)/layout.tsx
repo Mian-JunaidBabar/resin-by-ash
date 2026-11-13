@@ -1,4 +1,5 @@
 import { Footer, Header, WhatsAppFab } from "@/components/store/chrome";
+import { Analytics } from "@/components/store/analytics";
 import { JsonLd } from "@/components/ui";
 import { getCategoryTree, getProducts, getSettings } from "@/lib/queries";
 import { productPrice } from "@/lib/pricing";
@@ -34,13 +35,13 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
             url: SITE.url,
             logo: absoluteUrl("/brand/logo-512.png"),
             image: absoluteUrl("/opengraph-image.jpg"),
-            telephone: SITE.whatsappDisplay,
+            telephone: settings.whatsappDisplay,
             priceRange: "Rs 650 – Rs 8,500",
             currenciesAccepted: "PKR",
-            paymentAccepted: "Cash on Delivery",
+            paymentAccepted: settings.acceptCod ? "Cash on Delivery" : "Bank transfer",
             areaServed: { "@type": "Country", name: "Pakistan" },
             address: { "@type": "PostalAddress", addressCountry: "PK" },
-            sameAs: [SITE.instagram, SITE.tiktok],
+            sameAs: [settings.instagram || SITE.instagram, settings.tiktok || SITE.tiktok].filter(Boolean),
           },
           {
             "@context": "https://schema.org",
@@ -63,6 +64,7 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
       </main>
       <Footer shopLinks={shopLinks} settings={settings} />
       <WhatsAppFab phone={settings.whatsappNumber} />
+      <Analytics />
     </>
   );
 }

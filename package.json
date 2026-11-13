@@ -14,7 +14,9 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:backup": "bash scripts/backup-db.sh",
+    "db:restore-drill": "bash scripts/restore-drill.sh"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

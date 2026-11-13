@@ -52,3 +52,6 @@ next-env.d.ts
 
 # locally uploaded catalogue media
 /.uploads/
+
+# database dumps (never commit customer data)
+/backups/

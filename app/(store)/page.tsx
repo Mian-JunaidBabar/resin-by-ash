@@ -67,19 +67,12 @@ export default async function HomePage() {
       {/* ───── Hero ───── */}
       <section className="wrap grid items-center gap-7 pt-7 pb-10 lg:grid-cols-2 lg:gap-20 lg:pt-16 lg:pb-[72px]">
         <div className="flex max-w-[520px] flex-col gap-3.5 lg:gap-[22px]">
-          <Eyebrow line className="enter">
-            {seasonal ? "Wedding season" : content.heroEyebrow}
-          </Eyebrow>
-          <h1
-            className="enter-rise font-display text-[46px] leading-[1.04] font-medium tracking-[-0.01em] lg:text-[84px] lg:leading-[0.98] lg:tracking-[-0.015em]"
-            style={{ ["--d" as string]: "80ms" }}
-          >
+          <Eyebrow line>{seasonal ? "Wedding season" : content.heroEyebrow}</Eyebrow>
+          <h1 className="font-display text-[46px] leading-[1.04] font-medium tracking-[-0.01em] lg:text-[84px] lg:leading-[0.98] lg:tracking-[-0.015em]">
             {headline} {headlineEm ? <em>{headlineEm}</em> : null}
           </h1>
-          <p className="enter text-[15px] leading-relaxed lg:max-w-[440px] lg:text-lg lg:leading-[1.65]" style={{ ["--d" as string]: "160ms" }}>
-            {content.heroSubcopy}
-          </p>
-          <div className="enter mt-1.5 flex gap-2.5 lg:mt-2.5 lg:gap-3.5" style={{ ["--d" as string]: "240ms" }}>
+          <p className="text-[15px] leading-relaxed lg:max-w-[440px] lg:text-lg lg:leading-[1.65]">{content.heroSubcopy}</p>
+          <div className="mt-1.5 flex gap-2.5 lg:mt-2.5 lg:gap-3.5">
             <Link href={content.primaryCtaHref} className="btn btn-primary flex-1 lg:flex-none">
               {content.primaryCtaLabel}
             </Link>
@@ -88,7 +81,7 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-        <div className="enter-fade flex justify-center" style={{ ["--d" as string]: "120ms" }}>
+        <div className="flex justify-center">
           <ArchFrame className="h-[438px] w-full lg:h-[588px] lg:w-[470px]" inset={10} sheen>
             <div className="absolute inset-0">
               {heroImage ? (

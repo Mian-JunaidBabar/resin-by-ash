@@ -10,14 +10,14 @@ const cormorant = localFont({
     { path: "./fonts/cormorant-italic.woff2", weight: "500", style: "italic" },
   ],
   variable: "--font-cormorant",
-  display: "swap",
+  display: "optional",
   fallback: ["Georgia", "serif"],
 });
 
 const dmSans = localFont({
   src: [{ path: "./fonts/dm-sans.woff2", weight: "100 1000", style: "normal" }],
   variable: "--font-dm-sans",
-  display: "swap",
+  display: "optional",
   fallback: ["system-ui", "sans-serif"],
 });
 
