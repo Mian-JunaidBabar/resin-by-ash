@@ -8,7 +8,7 @@ export const SITE = {
   tagline: "Keepsakes, poured by hand.",
   description:
     "Handmade resin keepsakes from a small studio in Pakistan: nikkah trays and pens, resin jewellery, wedding flower preservation, keychains, watches and custom pieces. Cash on Delivery nationwide.",
-  // TODO(phase 2): confirm domain with client. Overridable per environment.
+  // Domain comes from NEXT_PUBLIC_SITE_URL; the fallback is the production domain.
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://resinbyash.pk",
   locale: "en_PK",
   currency: "PKR",

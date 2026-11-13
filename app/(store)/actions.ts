@@ -242,13 +242,33 @@ export async function submitCustomRequest(
     images: (input.images ?? []).slice(0, 3).map((c) => clean(c, 500)),
   };
   const errors: Record<string, string> = {};
+  const phone = normalisePhone(data.phone);
   if (data.name.length < 2) errors.name = "Please enter your name.";
-  if (!normalisePhone(data.phone)) errors.phone = "Enter a Pakistani mobile number, e.g. 0300 1234567.";
+  if (!phone) errors.phone = "Enter a Pakistani mobile number, e.g. 0300 1234567.";
   if (data.description.length < 10) errors.description = "Tell Ash a little more about your idea.";
-  if (Object.keys(errors).length) return { ok: false, errors };
+  if (Object.keys(errors).length || !phone) return { ok: false, errors };
 
-  // TODO(phase 7): persist CustomRequest and uploaded references.
-  return { ok: true, waUrl: waLink(customRequestMessage(data)) };
+  const settings = await getSettings();
+  const occasionDate = data.date && !Number.isNaN(Date.parse(`${data.date}T00:00:00+05:00`))
+    ? new Date(`${data.date}T00:00:00+05:00`)
+    : null;
+  const imageUrls = data.images.filter((url) => SAFE_MEDIA.test(url)).slice(0, 3);
+
+  await db.customRequest.create({
+    data: {
+      name: data.name,
+      phone,
+      item: data.item,
+      occasionDate,
+      budget: data.budget || "Not sure yet",
+      colours: data.colours,
+      description: data.description,
+      imageUrls,
+      status: "NEW",
+    },
+  });
+
+  return { ok: true, waUrl: waLink(customRequestMessage({ ...data, phone, images: imageUrls }), settings.whatsappNumber) };
 }
 
 export async function sendContactMessage(input: {
@@ -264,6 +284,26 @@ export async function sendContactMessage(input: {
   if (contact.length < 5) errors.contact = "Add a WhatsApp number or email so Ash can reply.";
   if (message.length < 5) errors.message = "Please write a short message.";
   if (Object.keys(errors).length) return { ok: false, errors };
-  // TODO(phase 7): insert ContactMessage and notify Ash (email or WhatsApp Business API).
+
+  await db.contactMessage.create({ data: { name, contact, message } });
+
+  // Optional email notification. The message is always saved first, so a mail
+  // provider outage never loses a customer enquiry.
+  if (process.env.RESEND_API_KEY && contact.includes("@")) {
+    try {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: "Resin by Ash <hello@resinbyash.pk>",
+          to: [process.env.ADMIN_EMAIL ?? "ash@resinbyash.pk"],
+          subject: `New website message from ${name}`,
+          text: `${name} (${contact})\n\n${message}`,
+        }),
+      });
+    } catch {
+      // Saved in Admin → Messages; email is only a convenience.
+    }
+  }
   return { ok: true };
 }

@@ -105,3 +105,18 @@ export function customRequestMessage(input: {
     .filter((l) => l !== "")
     .join("\n");
 }
+
+/** Quote message opened from Admin → Custom requests. */
+export function customQuoteMessage(input: { name: string; item: string; quote: number; readyBy?: string }) {
+  return [
+    `Assalam o Alaikum ${input.name}!`,
+    ``,
+    `Thank you for your custom request for ${input.item}.`,
+    `Your quote: ${rs(input.quote)}`,
+    input.readyBy ? `Ready by: ${formatDate(input.readyBy)}` : "",
+    ``,
+    `Reply here to confirm and we will start on your piece.`,
+  ]
+    .filter((l) => l !== "")
+    .join("\n");
+}

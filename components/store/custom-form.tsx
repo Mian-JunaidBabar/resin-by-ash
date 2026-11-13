@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, useSyncExternalStore, useTransition } from "react";
-import { submitCustomRequest } from "@/app/(store)/actions";
+import { submitCustomRequest, uploadReferenceImage } from "@/app/(store)/actions";
 import { UploadIcon, WhatsAppIcon } from "@/components/icons";
 import { TONES } from "@/lib/data/catalog";
 
@@ -35,6 +35,7 @@ export function CustomForm() {
   const item = picked ?? (linked && ITEMS.some((i) => i.v === linked) ? linked : ITEMS[0].v);
   const [colours, setColours] = useState<string[]>(["Ivory", "Gold"]);
   const [images, setImages] = useState<(string | undefined)[]>([undefined, undefined, undefined]);
+  const [uploading, setUploading] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
   const [pending, start] = useTransition();
@@ -85,7 +86,7 @@ export function CustomForm() {
           Sent to <em>Ash.</em>
         </h2>
         <p className="text-[15px] leading-relaxed">
-          Your idea opened in WhatsApp. Attach your reference photos there and press send. Ash will reply with a design and quote.
+          Your idea and photos are with Ash, and the message opened in WhatsApp. Press send. Ash will reply with a design and quote.
         </p>
         <button type="button" onClick={() => setSent(false)} className="link-underline self-center text-sm font-semibold">
           Start another request
@@ -101,7 +102,7 @@ export function CustomForm() {
       className="flex scroll-mt-28 flex-col gap-[18px] rounded-2xl border border-sand-2 bg-white px-[18px] py-6 lg:px-8 lg:py-8"
     >
       <h2 className="font-display text-[30px] leading-[1.1] font-medium">Tell Ash about it</h2>
-      <fieldset disabled={pending} className="m-0 flex flex-col gap-[18px] border-0 p-0">
+      <fieldset disabled={pending || uploading > 0} className="m-0 flex flex-col gap-[18px] border-0 p-0">
         <div className="grid gap-[18px] lg:grid-cols-2 lg:gap-3">
           <label className="label" htmlFor={`${id}-name`}>
             Your name
@@ -168,20 +169,33 @@ export function CustomForm() {
                 className="relative flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-gold p-2 text-center text-xs transition-colors hover:bg-sand-3 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-caramel"
               >
                 <UploadIcon size={20} />
-                <span className="line-clamp-2 break-all">{img ?? `Image ${n + 1}`}</span>
-                {/* Phase 2: upload to storage; for now the customer attaches photos in WhatsApp. */}
+                <span className="line-clamp-2 break-all">{img ? "Photo attached" : `Image ${n + 1}`}</span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                   className="absolute h-px w-px opacity-0"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0]?.name;
-                    setImages((arr) => arr.map((x, i) => (i === n ? f : x)));
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploading((count) => count + 1);
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    const res = await uploadReferenceImage(fd);
+                    setUploading((count) => count - 1);
+                    if (!res.ok) {
+                      setErrors((errs) => ({ ...errs, images: res.error }));
+                      e.target.value = "";
+                      return;
+                    }
+                    setImages((arr) => arr.map((x, i) => (i === n ? res.url : x)));
+                    setErrors((errs) => ({ ...errs, images: "" }));
                   }}
                 />
               </label>
             ))}
           </div>
+          {uploading ? <p className="mt-1 text-[13px] text-cocoa">Uploading {uploading} photo{uploading > 1 ? "s" : ""}…</p> : null}
+          {errors.images ? <p className="mt-1 text-[13px] font-medium text-[#9b3b2f]">{errors.images}</p> : null}
         </fieldset>
         <fieldset className="m-0 border-0 p-0">
           <legend className="mb-2.5 p-0 text-sm font-semibold">
@@ -211,7 +225,7 @@ export function CustomForm() {
           {pending ? "Preparing your message…" : "Send on WhatsApp"}
         </button>
         <span className="-mt-1.5 text-center text-[13px] leading-normal">
-          Your details open in WhatsApp, ready to send. Attach the photos there too. No payment until the design is agreed.
+          Your details and photos are saved, then open in WhatsApp ready to send. No payment until the design is agreed.
         </span>
       </fieldset>
     </form>

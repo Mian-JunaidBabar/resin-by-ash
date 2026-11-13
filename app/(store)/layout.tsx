@@ -1,11 +1,11 @@
 import { Footer, Header, WhatsAppFab } from "@/components/store/chrome";
 import { JsonLd } from "@/components/ui";
-import { getCategoryTree, getProducts } from "@/lib/queries";
+import { getCategoryTree, getProducts, getSettings } from "@/lib/queries";
 import { productPrice } from "@/lib/pricing";
 import { SITE, absoluteUrl } from "@/lib/site";
 
 export default async function StoreLayout({ children }: LayoutProps<"/">) {
-  const [products, tree] = await Promise.all([getProducts(), getCategoryTree()]);
+  const [products, tree, settings] = await Promise.all([getProducts(), getCategoryTree(), getSettings()]);
   const catName = Object.fromEntries(tree.map((c) => [c.slug, c.name]));
   const searchItems = products.map((p) => ({
     slug: p.slug,
@@ -57,12 +57,12 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
           },
         ]}
       />
-      <Header searchItems={searchItems} />
+      <Header searchItems={searchItems} settings={settings} />
       <main id="main" className="min-h-[60vh]">
         {children}
       </main>
-      <Footer shopLinks={shopLinks} />
-      <WhatsAppFab />
+      <Footer shopLinks={shopLinks} settings={settings} />
+      <WhatsAppFab phone={settings.whatsappNumber} />
     </>
   );
 }

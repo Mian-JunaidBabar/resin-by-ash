@@ -12,12 +12,21 @@ const db = new Pool({ connectionString: process.env.DATABASE_URL_TEST ?? process
  */
 
 test.beforeAll(async () => {
-  // Deterministic admin order screens: clear test orders and seed one fixture.
+  // Deterministic admin screens: clear test data and seed stable fixtures.
+  await db.query('DELETE FROM "CustomRequest"');
+  await db.query('DELETE FROM "ContactMessage"');
   await db.query('DELETE FROM "Order"');
-  await db.query('DELETE FROM "Customer" WHERE phone = $1', ["03009999999"]);
+  await db.query('DELETE FROM "Customer"');
+  await db.query(
+    `INSERT INTO "CustomRequest" (id, name, phone, city, item, budget, colours, description, status, "createdAt", "updatedAt")
+     VALUES (31, 'Maryam A.', '03001112222', 'Lahore', 'Nikkah tray & pens', 'Rs 5,000–10,000', ARRAY['Ivory','Gold'], 'Round tray with our names in Urdu and English, gold flakes around the edge.', 'NEW', now() - interval '5 hours', now())`,
+  );
+  await db.query(
+    `INSERT INTO "ContactMessage" (id, name, contact, message, "createdAt") VALUES ('visual-message', 'Sana K.', '03003334444', 'Do you deliver to Sialkot before the 20th?', now() - interval '2 hours')`,
+  );
   const customer = await db.query(
-    'INSERT INTO "Customer" (id, name, phone, city, address, "updatedAt") VALUES ($1, $2, $3, $4, $5, now()) RETURNING id',
-    ["visual-customer", "Ayesha H.", "03009999999", "Lahore", "House 8, Street 2, Gulberg"],
+    'INSERT INTO "Customer" (id, name, phone, city, address, tag, "updatedAt") VALUES ($1, $2, $3, $4, $5, $6, now()) RETURNING id',
+    ["visual-customer", "Ayesha H.", "03009999999", "Lahore", "House 8, Street 2, Gulberg", "Nikkah Feb"],
   );
   const order = await db.query(
     `INSERT INTO "Order" (id, number, "customerId", name, phone, city, address, notes, subtotal, savings, delivery, total, "whatsappMessage", status, "updatedAt")
@@ -60,6 +69,8 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   await db.query('DELETE FROM "Order" WHERE id = $1', ["visual-order"]);
   await db.query('DELETE FROM "Customer" WHERE id = $1', ["visual-customer"]);
+  await db.query('DELETE FROM "CustomRequest" WHERE id = 31');
+  await db.query('DELETE FROM "ContactMessage" WHERE id = $1', ["visual-message"]);
   await db.end();
 });
 
@@ -86,6 +97,8 @@ const ADMIN: [name: string, path: string][] = [
   ["admin-product-new", "/admin/products/new"],
   ["admin-categories", "/admin/categories"],
   ["admin-requests", "/admin/requests"],
+  ["admin-request-detail", "/admin/requests/31"],
+  ["admin-messages", "/admin/requests/messages"],
   ["admin-customers", "/admin/customers"],
   ["admin-settings", "/admin/settings"],
   ["admin-users", "/admin/settings/users"],

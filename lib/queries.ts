@@ -330,7 +330,12 @@ export async function getRelated(p: Product, limit = 4): Promise<Product[]> {
     .sort((a, b) => {
       const sameA = a.row.categoryId === p.categoryId ? 0 : 1;
       const sameB = b.row.categoryId === p.categoryId ? 0 : 1;
-      return sameA - sameB || b.product.soldCount - a.product.soldCount;
+      return (
+        sameA - sameB ||
+        b.product.soldCount - a.product.soldCount ||
+        a.row.category.sortOrder - b.row.category.sortOrder ||
+        a.product.name.localeCompare(b.product.name)
+      );
     })
     .slice(0, limit)
     .map((x) => x.product);

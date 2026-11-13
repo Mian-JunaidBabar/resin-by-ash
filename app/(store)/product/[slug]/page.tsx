@@ -7,7 +7,7 @@ import { ProductPurchase } from "@/components/store/product-purchase";
 import { ShopPageSkeleton } from "@/components/store/shop-skeleton";
 import { Breadcrumbs, JsonLd, ProductCard } from "@/components/ui";
 import { productPrice } from "@/lib/pricing";
-import { getProduct, getProductStaticParams, getRelated } from "@/lib/queries";
+import { getProduct, getProductStaticParams, getRelated, getSettings } from "@/lib/queries";
 import { SITE, absoluteUrl } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -56,7 +56,7 @@ async function ProductContent({ params }: { params: Params }) {
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) notFound();
-  const related = await getRelated(product);
+  const [related, settings] = await Promise.all([getRelated(product), getSettings()]);
   const price = productPrice(product);
   const path = product.categoryPath ?? [{ slug: product.category, name: product.category, shortName: product.category }];
   const category = path[0];
@@ -126,7 +126,7 @@ async function ProductContent({ params }: { params: Params }) {
           </section>
 
           <section className="px-5 pt-[22px] md:px-10 lg:px-0">
-            <ProductPurchase product={product} />
+            <ProductPurchase product={product} whatsappNumber={settings.whatsappNumber} />
           </section>
 
           <section className="px-5 pt-[26px] md:px-10 lg:px-0">

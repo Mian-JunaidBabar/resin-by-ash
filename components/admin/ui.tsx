@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { STATUS_STYLES } from "@/lib/data/admin";
+import { STATUS_STYLES } from "@/lib/orders";
 import type { OrderStatus } from "@/lib/types";
 
 export function Card({ title, action, children, className = "", pad = true }: { title?: ReactNode; action?: ReactNode; children: ReactNode; className?: string; pad?: boolean }) {

@@ -38,6 +38,8 @@ test("every admin route redirects a signed-out visitor to login with next", asyn
 test("a successful login lands on the page that was requested", async ({ page }) => {
   await page.goto("/admin/orders");
   await expect(page).toHaveURL(/\/admin\/login\?next=/);
+  // The Suspense fallback starts with next=/admin; wait for the streamed param.
+  await expect(page.locator('input[name="next"][value="/admin/orders"]')).toHaveCount(1);
   await page.fill('input[name="email"]', EMAIL);
   await page.fill('input[name="password"]', PASSWORD);
   await page.getByRole("button", { name: "Sign in" }).click();

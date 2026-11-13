@@ -11,7 +11,7 @@ import { personalisationSummary, waLink } from "@/lib/whatsapp";
 
 const TEXT_COLOURS = ["Gold", "Silver", "Rose gold", "White"];
 
-export function ProductPurchase({ product }: { product: Product }) {
+export function ProductPurchase({ product, whatsappNumber }: { product: Product; whatsappNumber: string }) {
   const sizes = product.sizes ?? [];
   const colours = product.colours ?? [];
   const [sizeI, setSizeI] = useState(sizes.length > 1 ? 1 : 0);
@@ -244,7 +244,7 @@ export function ProductPurchase({ product }: { product: Product }) {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <a href={waLink(msg)} target="_blank" rel="noopener" className="btn btn-primary !h-[54px] !text-base">
+        <a href={waLink(msg, whatsappNumber)} target="_blank" rel="noopener" className="btn btn-primary !h-[54px] !text-base">
           <WhatsAppIcon size={20} />
           Order on WhatsApp · {rs(total)}
         </a>

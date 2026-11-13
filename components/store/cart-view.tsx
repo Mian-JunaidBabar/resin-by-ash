@@ -7,11 +7,11 @@ import { placeOrder } from "@/app/(store)/actions";
 import { CloseIcon, GiftIcon, WhatsAppIcon } from "@/components/icons";
 import { ArchFrame, ResinArt } from "@/components/ui";
 import { cart, saveLastOrder, useCart, useHydrated } from "@/lib/cart";
-import { CITIES, deliveryFor } from "@/lib/delivery";
+import type { DeliveryZone } from "@/lib/types";
 import { rs } from "@/lib/pricing";
 import { lineOptions, personalisationSummary } from "@/lib/whatsapp";
 
-export function CartView() {
+export function CartView({ zones }: { zones: DeliveryZone[] }) {
   const lines = useCart();
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -24,7 +24,8 @@ export function CartView() {
   const count = lines.reduce((n, l) => n + l.qty, 0);
   const full = lines.reduce((s, l) => s + l.unitWas * l.qty, 0);
   const paid = lines.reduce((s, l) => s + l.unitPrice * l.qty, 0);
-  const zone = deliveryFor(city);
+  const zone = city ? zones.find((z) => z.cities.includes(city)) ?? zones[zones.length - 1] : undefined;
+  const cities = [...new Set(zones.flatMap((z) => z.cities))];
   const total = paid + (zone?.charge ?? 0);
 
   if (!hydrated || placed) {
@@ -203,7 +204,7 @@ export function CartView() {
               <option value="" disabled>
                 Select your city
               </option>
-              {CITIES.map((c) => (
+              {cities.map((c) => (
                 <option key={c}>{c}</option>
               ))}
             </select>

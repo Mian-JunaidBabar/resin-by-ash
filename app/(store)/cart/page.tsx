@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CartView } from "@/components/store/cart-view";
+import { getDeliveryZones } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Your cart",
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/cart" },
 };
 
-export default function CartPage() {
-  return <CartView />;
+export default async function CartPage() {
+  const zones = await getDeliveryZones();
+  return <CartView zones={zones} />;
 }

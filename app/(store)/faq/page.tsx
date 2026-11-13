@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PlusIcon, WhatsAppIcon } from "@/components/icons";
 import { Eyebrow, JsonLd } from "@/components/ui";
 import { FAQ_GROUPS } from "@/lib/data/faq";
+import { getDeliveryZones, getSettings } from "@/lib/queries";
 import { waLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
@@ -12,8 +13,17 @@ export const metadata: Metadata = {
   openGraph: { url: "/faq" },
 };
 
-export default function FaqPage() {
-  const answered = FAQ_GROUPS.flatMap((g) => g.items).filter((i) => !i.a.startsWith("["));
+export default async function FaqPage() {
+  const [zones, settings] = await Promise.all([getDeliveryZones(), getSettings()]);
+  const deliveryAnswer = zones
+    .map((z) => `${z.label} Rs ${z.charge.toLocaleString("en-US")} (${z.days} days)`)
+    .join(", ")
+    .replace(/,([^,]*)$/, ", and$1");
+  const groups = FAQ_GROUPS.map((g) => ({
+    ...g,
+    items: g.items.map((item) => (item.q === "How much is delivery?" ? { ...item, a: `${deliveryAnswer}.` } : item)),
+  }));
+  const answered = groups.flatMap((g) => g.items).filter((i) => !i.a.startsWith("["));
   return (
     <>
       <JsonLd
@@ -32,7 +42,7 @@ export default function FaqPage() {
             Questions, <em>answered.</em>
           </h1>
           <nav aria-label="FAQ topics" className="no-scrollbar -mx-5 mt-2 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:mt-4 lg:flex-col lg:items-start lg:px-0">
-            {FAQ_GROUPS.map((g) => (
+            {groups.map((g) => (
               <a key={g.id} href={`#${g.id}`} className="chip !h-[38px] !px-3.5 !text-[13px] lg:!h-auto lg:!border-0 lg:!bg-transparent lg:!p-0 lg:!text-[15px] lg:hover:!text-caramel">
                 {g.title}
               </a>
@@ -40,7 +50,7 @@ export default function FaqPage() {
           </nav>
         </section>
         <div>
-          {FAQ_GROUPS.map((g) => (
+          {groups.map((g) => (
             <section key={g.id} id={g.id} className="flex scroll-mt-28 flex-col pt-7 pb-1 lg:pt-0 lg:pb-12">
               <h2 className="mb-2.5 font-display text-[28px] leading-[1.1] font-medium lg:text-4xl">{g.title}</h2>
               {g.items.map((q, i) => (
@@ -59,7 +69,7 @@ export default function FaqPage() {
               <h2 className="font-display text-[28px] leading-[1.1] font-medium">Still wondering?</h2>
               <p className="text-sm leading-relaxed">Ask Ash directly. She usually replies within [reply time].</p>
             </div>
-            <a href={waLink()} target="_blank" rel="noopener" className="btn btn-primary shrink-0">
+            <a href={waLink(undefined, settings.whatsappNumber)} target="_blank" rel="noopener" className="btn btn-primary shrink-0">
               <WhatsAppIcon size={20} /> Ask on WhatsApp
             </a>
           </section>

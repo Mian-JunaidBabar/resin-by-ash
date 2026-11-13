@@ -4,9 +4,10 @@ import { Suspense } from "react";
 import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 import { CartLink, DesktopNav, MobileMenu, SearchButton, type SearchItem } from "@/components/store/header-client";
 import { SITE, TRUST_POINTS } from "@/lib/site";
+import type { StoreSettings } from "@/lib/types";
 import { waLink } from "@/lib/whatsapp";
 
-export function Header({ searchItems }: { searchItems: SearchItem[] }) {
+export function Header({ searchItems, settings }: { searchItems: SearchItem[]; settings: StoreSettings }) {
   return (
     <>
       <a
@@ -15,9 +16,11 @@ export function Header({ searchItems }: { searchItems: SearchItem[] }) {
       >
         Skip to content
       </a>
-      <div className="flex h-9 items-center justify-center bg-sand px-4 text-center text-xs tracking-[0.03em] lg:h-10 lg:text-[13px] lg:tracking-[0.04em]">
-        {SITE.announcement}
-      </div>
+      {settings.announcementOn && settings.announcement ? (
+        <div className="flex h-9 items-center justify-center bg-sand px-4 text-center text-xs tracking-[0.03em] lg:h-10 lg:text-[13px] lg:tracking-[0.04em]">
+          {settings.announcement}
+        </div>
+      ) : null}
       <header className="sticky top-0 z-40 border-b border-sand-2 bg-cream/90 backdrop-blur-md supports-[backdrop-filter]:bg-cream/80">
         <div className="wrap grid h-[76px] grid-cols-[88px_1fr_88px] items-center !px-2 md:!px-10 lg:h-[88px] lg:grid-cols-[200px_1fr_200px] xl:!px-[120px]">
           {/* Left: mobile menu + search / desktop logo */}
@@ -50,7 +53,7 @@ export function Header({ searchItems }: { searchItems: SearchItem[] }) {
             </span>
             <CartLink />
             <a
-              href={waLink()}
+              href={waLink(undefined, settings.whatsappNumber)}
               target="_blank"
               rel="noopener"
               aria-label="Chat on WhatsApp"
@@ -100,7 +103,7 @@ function FooterCol({ title, links }: { title: string; links: { label: string; hr
   );
 }
 
-export function Footer({ shopLinks = SHOP_LINKS }: { shopLinks?: { label: string; href: string }[] }) {
+export function Footer({ shopLinks = SHOP_LINKS, settings }: { shopLinks?: { label: string; href: string }[]; settings: StoreSettings }) {
   return (
     <footer className="bg-brown text-cream">
       <div className="wrap flex flex-col gap-7 pt-10 pb-7 lg:gap-10 lg:pt-16 lg:pb-9">
@@ -126,9 +129,9 @@ export function Footer({ shopLinks = SHOP_LINKS }: { shopLinks?: { label: string
           <div className="col-span-2 lg:col-span-1">
             <div className="flex gap-2.5 lg:hidden">
               {[
-                { label: "WhatsApp", href: waLink() },
-                { label: "Instagram", href: SITE.instagram },
-                { label: "TikTok", href: SITE.tiktok },
+                { label: "WhatsApp", href: waLink(undefined, settings.whatsappNumber) },
+                { label: "Instagram", href: settings.instagram || SITE.instagram },
+                { label: "TikTok", href: settings.tiktok || SITE.tiktok },
               ].map((s) => (
                 <a
                   key={s.label}
@@ -145,9 +148,9 @@ export function Footer({ shopLinks = SHOP_LINKS }: { shopLinks?: { label: string
               <FooterCol
                 title="Say hello"
                 links={[
-                  { label: "WhatsApp", href: waLink(), external: true },
-                  { label: "Instagram", href: SITE.instagram, external: true },
-                  { label: "TikTok", href: SITE.tiktok, external: true },
+                  { label: "WhatsApp", href: waLink(undefined, settings.whatsappNumber), external: true },
+                  { label: "Instagram", href: settings.instagram || SITE.instagram, external: true },
+                  { label: "TikTok", href: settings.tiktok || SITE.tiktok, external: true },
                 ]}
               />
             </div>
@@ -166,10 +169,10 @@ export function Footer({ shopLinks = SHOP_LINKS }: { shopLinks?: { label: string
 // Fixed at build time so the footer stays in the static shell (Cache Components forbids Date in render).
 const SITE_YEAR = 2026;
 
-export function WhatsAppFab() {
+export function WhatsAppFab({ phone }: { phone: string }) {
   return (
     <a
-      href={waLink("Assalam o Alaikum Ash! I have a question about an order.")}
+      href={waLink("Assalam o Alaikum Ash! I have a question about an order.", phone)}
       target="_blank"
       rel="noopener"
       aria-label="Order on WhatsApp"

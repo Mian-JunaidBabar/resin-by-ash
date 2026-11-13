@@ -11,6 +11,15 @@ export const ORDER_STATUS_LABELS: Record<string, OrderStatus> = {
   CANCELLED: "Cancelled",
 };
 
+export const STATUS_STYLES: Record<OrderStatus, string> = {
+  New: "bg-st-new-bg text-st-new-fg",
+  Confirmed: "bg-st-confirmed-bg text-st-confirmed-fg",
+  "In progress": "bg-st-progress-bg text-st-progress-fg",
+  Shipped: "bg-st-shipped-bg text-st-shipped-fg",
+  Delivered: "bg-st-done-bg text-st-done-fg",
+  Cancelled: "bg-st-off-bg text-st-off-fg",
+};
+
 export const ORDER_STATUS_VALUES: Record<OrderStatus, "NEW" | "CONFIRMED" | "IN_PROGRESS" | "SHIPPED" | "DELIVERED" | "CANCELLED"> = {
   New: "NEW",
   Confirmed: "CONFIRMED",

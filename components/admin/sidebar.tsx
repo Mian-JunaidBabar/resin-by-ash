@@ -8,8 +8,8 @@ import { signOut } from "@/app/admin/(panel)/auth-actions";
 const LINKS = [
   { label: "Dashboard", href: "/admin" },
   { label: "Home page", href: "/admin/home" },
-  { label: "Orders", href: "/admin/orders", badge: 5 },
-  { label: "Custom requests", href: "/admin/requests", badge: 3 },
+  { label: "Orders", href: "/admin/orders", badge: "orders" },
+  { label: "Custom requests", href: "/admin/requests", badge: "requests" },
   { label: "Products", href: "/admin/products" },
   { label: "Categories", href: "/admin/categories" },
   { label: "Customers", href: "/admin/customers" },
@@ -17,7 +17,7 @@ const LINKS = [
 ];
 
 /** Admin nav from components.html "Admin sidebar": stacks on wide screens, wraps into a grid on phones. */
-export function AdminSidebar() {
+export function AdminSidebar({ badges = {} }: { badges?: { orders?: number; requests?: number } }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Admin" className="flex flex-col gap-[18px] px-3.5 py-5 lg:sticky lg:top-0 lg:min-h-dvh">
@@ -41,9 +41,9 @@ export function AdminSidebar() {
               }`}
             >
               <span>{l.label}</span>
-              {l.badge ? (
+              {l.badge && badges[l.badge as keyof typeof badges] ? (
                 <span className="flex h-5 min-w-[22px] items-center justify-center rounded-full bg-caramel px-1.5 text-[11px] font-bold text-white">
-                  {l.badge}
+                  {badges[l.badge as keyof typeof badges]}
                 </span>
               ) : null}
             </Link>
