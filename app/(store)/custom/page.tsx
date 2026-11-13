@@ -32,7 +32,7 @@ const PAST = ["Nikkah set", "Bouquet block", "Name clock", "Couple pens", "Pet k
 const FAQ = [
   { q: "How long does a custom piece take?", a: `Usually ${SITE.defaultLeadTime} after the design is agreed. Tell Ash your date early for nikkah orders.` },
   { q: "Is personalisation extra?", a: "No. Names, dates and short text are free." },
-  { q: "Do I pay upfront?", a: "You pay Cash on Delivery. [Advance policy for large custom orders, if any.]" },
+  { q: "Do I pay upfront?", a: "Cash on Delivery is standard. For large custom orders, Ash confirms any advance on WhatsApp before materials are ordered." },
   { q: "Can I send my own flowers?", a: "Yes. Ash will share how to dry or courier them before you send." },
 ];
 

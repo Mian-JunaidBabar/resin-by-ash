@@ -40,6 +40,7 @@ export function Gallery({ slug, name, images, tone }: { slug: string; name: stri
         alt={n === 0 ? name : `${name}, photo ${n + 1}`}
         fill
         priority={n === 0}
+        quality={n === 0 ? 65 : 75}
         sizes="(min-width: 1024px) 50vw, 100vw"
         className="object-cover"
       />

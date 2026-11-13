@@ -38,6 +38,7 @@ const nextConfig: NextConfig = {
   },
   cacheComponents: true,
   images: {
+    qualities: [55, 65, 75],
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { HoverMedia } from "@/components/store/hover-media";
 import Link from "next/link";
 import { ViewTransition, type ReactNode } from "react";
 import { rs } from "@/lib/pricing";
@@ -87,17 +88,10 @@ export function ProductMedia({
             fill
             sizes={sizes}
             priority={priority}
+            quality={priority ? 55 : 75}
             className="zoom-img object-cover"
           />
-          {second ? (
-            <Image
-              src={second}
-              alt=""
-              fill
-              sizes={sizes}
-              className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            />
-          ) : null}
+          {second ? <HoverMedia src={second} sizes={sizes} /> : null}
         </>
       ) : (
         <div role="img" aria-label={product.name} className="zoom-img absolute inset-0">

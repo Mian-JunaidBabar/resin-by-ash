@@ -5,6 +5,7 @@ import { TrustRow } from "@/components/store/chrome";
 import { Carousel } from "@/components/store/carousel";
 import { ArchFrame, Eyebrow, ProductCard, ResinArt, SectionHead } from "@/components/ui";
 import { TONES } from "@/lib/data/catalog";
+import { STUDIO_PHOTOS } from "@/lib/data/studio-images";
 import {
   getBestSellers,
   getCategoryTree,
@@ -52,7 +53,7 @@ export default async function HomePage() {
       .filter((c) => c.showOnHome)
       .slice(0, 5)
       .map((c) => ({ name: c.name, href: `/shop/${c.slug}`, tone: c.tone, seed: c.slug, image: c.image })),
-    { name: "Custom Orders", href: "/custom", tone: "#ECE5DE", seed: "custom", image: undefined },
+    { name: "Custom Orders", href: "/custom", tone: "#ECE5DE", seed: "custom", image: STUDIO_PHOTOS.custom },
   ];
   const steps = (content.steps.length ? content.steps : FALLBACK_STEPS).map((s, i) => ({ ...s, n: i + 1 }));
 
@@ -86,10 +87,11 @@ export default async function HomePage() {
             <div className="absolute inset-0">
               {heroImage ? (
                 <Image
-                  src={heroImage}
+                  src={heroImage === STUDIO_PHOTOS.hero ? "/images/studio/hero-640.webp" : heroImage}
                   alt={headline}
                   fill
                   priority
+                  unoptimized={heroImage === STUDIO_PHOTOS.hero}
                   sizes="(min-width: 1024px) 470px, 100vw"
                   className="object-cover"
                 />
@@ -268,10 +270,9 @@ export default async function HomePage() {
                 {r.imageUrl ? (
                   <Image src={r.imageUrl} alt={`Review from ${r.caption}`} fill sizes="(min-width: 1024px) 250px, 210px" className="object-cover" />
                 ) : (
-                  <span className="text-[11px] leading-relaxed tracking-[0.1em] uppercase">
-                    WhatsApp chat
-                    <br />
-                    screenshot
+                  <span className="flex flex-col items-center gap-3">
+                    <span className="font-display text-4xl leading-none text-caramel">“</span>
+                    <span className="text-[10px] leading-relaxed tracking-[0.14em] uppercase">Shared on WhatsApp</span>
                   </span>
                 )}
               </div>

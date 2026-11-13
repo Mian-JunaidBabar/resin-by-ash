@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { storeMedia } from "@/lib/uploads";
 
 const text = z.string().trim().max(400);
 const longText = z.string().trim().max(2000);
@@ -30,6 +31,17 @@ const homeSchema = z.object({
 
 function iso(value: FormDataEntryValue | null): string {
   return typeof value === "string" ? value : "";
+}
+
+async function upload(formData: FormData, key: string): Promise<string> {
+  const file = formData.get(key);
+  if (!(file instanceof File) || !file.size) return "";
+  try {
+    const media = await storeMedia(file);
+    return media.isVideo ? "" : media.url;
+  } catch {
+    return "";
+  }
 }
 
 /** Date input → start/end of that day in Pakistan (UTC+5). */
@@ -66,6 +78,10 @@ export async function saveHome(formData: FormData) {
     text: iso(formData.get(`step.${i}.text`)).slice(0, 400),
   }));
 
+  const heroUpload = await upload(formData, "heroFile");
+  const flowerUpload = await upload(formData, "flowerFile");
+  const seasonalUpload = await upload(formData, "seasonalFile");
+
   await db.homeContent.update({
     where: { id: 1 },
     data: {
@@ -73,16 +89,16 @@ export async function saveHome(formData: FormData) {
       heroHeadline: data.heroHeadline,
       heroHeadlineEm: data.heroHeadlineEm,
       heroSubcopy: data.heroSubcopy,
-      heroImageUrl: data.heroImageUrl || null,
+      heroImageUrl: heroUpload || data.heroImageUrl || null,
       primaryCtaLabel: data.primaryCtaLabel,
       primaryCtaHref: data.primaryCtaHref,
       secondaryCtaLabel: data.secondaryCtaLabel,
       secondaryCtaHref: data.secondaryCtaHref,
       flowerHeadline: data.flowerHeadline,
       flowerCopy: data.flowerCopy,
-      flowerImageUrl: data.flowerImageUrl || null,
+      flowerImageUrl: flowerUpload || data.flowerImageUrl || null,
       seasonalHeadline: data.seasonalHeadline || null,
-      seasonalImageUrl: data.seasonalImageUrl || null,
+      seasonalImageUrl: seasonalUpload || data.seasonalImageUrl || null,
       seasonalFrom: day(data.seasonalFrom),
       seasonalTo: day(data.seasonalTo, true),
       steps,
@@ -92,7 +108,8 @@ export async function saveHome(formData: FormData) {
   const reviewIds = formData.getAll("reviewIds").map(String);
   for (const [index, id] of reviewIds.entries()) {
     const caption = iso(formData.get(`reviewCaption_${id}`)).slice(0, 120) || "Customer";
-    const imageUrl = iso(formData.get(`reviewImage_${id}`)).slice(0, 500);
+    const uploaded = await upload(formData, `reviewFile_${id}`);
+    const imageUrl = uploaded || iso(formData.get(`reviewImage_${id}`)).slice(0, 500);
     const sortOrder = Number(formData.get(`reviewOrder_${id}`));
     await db.review.update({
       where: { id },
@@ -109,7 +126,8 @@ export async function saveHome(formData: FormData) {
   for (const [index, id] of socialIds.entries()) {
     const label = iso(formData.get(`socialLabel_${id}`)).slice(0, 40) || "Post";
     const href = iso(formData.get(`socialHref_${id}`)).slice(0, 500);
-    const imageUrl = iso(formData.get(`socialImage_${id}`)).slice(0, 500);
+    const uploaded = await upload(formData, `socialFile_${id}`);
+    const imageUrl = uploaded || iso(formData.get(`socialImage_${id}`)).slice(0, 500);
     const sortOrder = Number(formData.get(`socialOrder_${id}`));
     await db.socialTile.update({
       where: { id },

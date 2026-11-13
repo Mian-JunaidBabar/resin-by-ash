@@ -9,6 +9,7 @@ import { FAQ_GROUPS } from "../lib/data/faq";
 import { DELIVERY_ZONES } from "../lib/delivery";
 import { SITE } from "../lib/site";
 import { slugify } from "../lib/slug";
+import { CATEGORY_PHOTOS, PRODUCT_PHOTOS, SOCIAL_PHOTOS, STUDIO_PHOTOS } from "../lib/data/studio-images";
 
 /**
  * Idempotent seed: safe to run repeatedly (`npm run db:reset` runs it twice in tests).
@@ -74,6 +75,8 @@ async function upsertCategory(input: {
   showOnHome: boolean;
   showInFooter: boolean;
   tone: string;
+  imageUrl: string | null;
+  ogImageUrl: string | null;
 }) {
   const existing = await db.category.findFirst({ where: { parentId: input.parentId, slug: input.slug } });
   if (existing) {
@@ -107,6 +110,8 @@ async function seedCategories() {
       showOnHome: c.showOnHome,
       showInFooter: true,
       tone: c.tone,
+      imageUrl: CATEGORY_PHOTOS[c.slug] ?? null,
+      ogImageUrl: CATEGORY_PHOTOS[c.slug] ?? null,
     });
     topIds.set(c.slug, top.id);
 
@@ -130,6 +135,8 @@ async function seedCategories() {
         showOnHome: false,
         showInFooter: false,
         tone: c.tone,
+        imageUrl: CATEGORY_PHOTOS[c.slug] ?? null,
+        ogImageUrl: CATEGORY_PHOTOS[c.slug] ?? null,
       });
       childIds.set(`${c.slug}/${slug}`, child.id);
     }
@@ -168,6 +175,14 @@ async function seedProducts(childIds: Map<string, string>) {
       })),
     ];
 
+    const photos = (PRODUCT_PHOTOS[p.slug] ?? []).map((url, position) => ({
+      url,
+      alt: p.name,
+      width: 1000,
+      height: 1250,
+      position,
+    }));
+
     const fields = {
       slug: p.slug,
       name: p.name,
@@ -193,8 +208,12 @@ async function seedProducts(childIds: Map<string, string>) {
 
     await db.product.upsert({
       where: { slug: p.slug },
-      update: { ...fields, variants: { deleteMany: {}, create: variants } },
-      create: { ...fields, variants: { create: variants } },
+      update: {
+        ...fields,
+        variants: { deleteMany: {}, create: variants },
+        images: { deleteMany: {}, create: photos },
+      },
+      create: { ...fields, variants: { create: variants }, images: { create: photos } },
     });
   }
 }
@@ -234,7 +253,7 @@ async function seedSettings() {
     else await db.deliveryZone.create({ data });
   }
 
-  await db.homeContent.upsert({
+  const home = await db.homeContent.upsert({
     where: { id: 1 },
     update: {},
     create: {
@@ -243,7 +262,7 @@ async function seedSettings() {
       heroHeadline: "Keepsakes, poured",
       heroHeadlineEm: "by hand.",
       heroSubcopy: "Nikkah trays, jewellery and preserved flowers, each piece made one at a time by Ash.",
-      heroImageUrl: null,
+      heroImageUrl: STUDIO_PHOTOS.hero,
       primaryCtaLabel: "Shop now",
       primaryCtaHref: "/shop",
       secondaryCtaLabel: "Make it custom",
@@ -251,8 +270,16 @@ async function seedSettings() {
       flowerHeadline: "Your wedding flowers, kept for good.",
       flowerCopy:
         "Bridal bouquets, nikkah garlands, a single rose from the day. Ash dries them gently and sets them in clear resin, as blocks, frames, clocks or jewellery.",
-      flowerImageUrl: null,
+      flowerImageUrl: STUDIO_PHOTOS.flower,
       steps: HOME_STEPS,
+    },
+  });
+
+  await db.homeContent.update({
+    where: { id: 1 },
+    data: {
+      heroImageUrl: home.heroImageUrl ?? STUDIO_PHOTOS.hero,
+      flowerImageUrl: home.flowerImageUrl ?? STUDIO_PHOTOS.flower,
     },
   });
 
@@ -265,7 +292,7 @@ async function seedSettings() {
 
   for (const [sortOrder, tile] of SOCIAL_TILES.entries()) {
     const existing = await db.socialTile.findFirst({ where: { sortOrder } });
-    const data = { ...tile, sortOrder };
+    const data = { ...tile, imageUrl: SOCIAL_PHOTOS[sortOrder] ?? null, sortOrder };
     if (existing) await db.socialTile.update({ where: { id: existing.id }, data });
     else await db.socialTile.create({ data });
   }

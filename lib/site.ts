@@ -13,13 +13,15 @@ export const SITE = {
   locale: "en_PK",
   currency: "PKR",
   country: "PK",
-  // International format without "+" or spaces, as wa.me expects. TODO(client): real number.
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "920000000000",
-  whatsappDisplay: process.env.NEXT_PUBLIC_WHATSAPP_DISPLAY ?? "+92 3XX XXXXXXX",
+  // International format without "+" or spaces, as wa.me expects. Set the real
+  // studio number in NEXT_PUBLIC_WHATSAPP_NUMBER before launch.
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "923001234567",
+  whatsappDisplay: process.env.NEXT_PUBLIC_WHATSAPP_DISPLAY ?? "+92 300 1234567",
   instagram: "https://www.instagram.com/resin.by.ash",
   instagramHandle: "@resin.by.ash",
   tiktok: "https://www.tiktok.com/@resin._by._ash",
   tiktokHandle: "@resin._by._ash",
+  googleBusinessUrl: process.env.NEXT_PUBLIC_GOOGLE_BUSINESS_URL ?? "",
   announcement: "Cash on Delivery all over Pakistan · Custom orders open",
   studioHours: [
     { days: "Monday – Saturday", hours: "10am – 7pm" },

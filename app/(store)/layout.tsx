@@ -41,7 +41,11 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
             paymentAccepted: settings.acceptCod ? "Cash on Delivery" : "Bank transfer",
             areaServed: { "@type": "Country", name: "Pakistan" },
             address: { "@type": "PostalAddress", addressCountry: "PK" },
-            sameAs: [settings.instagram || SITE.instagram, settings.tiktok || SITE.tiktok].filter(Boolean),
+            sameAs: [
+              settings.instagram || SITE.instagram,
+              settings.tiktok || SITE.tiktok,
+              SITE.googleBusinessUrl,
+            ].filter(Boolean),
           },
           {
             "@context": "https://schema.org",

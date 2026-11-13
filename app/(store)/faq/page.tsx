@@ -67,7 +67,7 @@ export default async function FaqPage() {
           <section className="mt-8 mb-[52px] flex flex-col gap-3 rounded-2xl bg-sand px-5 py-6 lg:mt-0 lg:mb-0 lg:flex-row lg:items-center lg:justify-between lg:px-9">
             <div className="flex flex-col gap-2">
               <h2 className="font-display text-[28px] leading-[1.1] font-medium">Still wondering?</h2>
-              <p className="text-sm leading-relaxed">Ask Ash directly. She usually replies within [reply time].</p>
+              <p className="text-sm leading-relaxed">Ask Ash directly on WhatsApp. She usually replies within a few hours during studio hours.</p>
             </div>
             <a href={waLink(undefined, settings.whatsappNumber)} target="_blank" rel="noopener" className="btn btn-primary shrink-0">
               <WhatsAppIcon size={20} /> Ask on WhatsApp

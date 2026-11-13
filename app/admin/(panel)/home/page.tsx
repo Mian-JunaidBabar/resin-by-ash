@@ -28,6 +28,20 @@ function Area({ label, name, value, rows = 3 }: { label: string; name: string; v
   );
 }
 
+function Upload({ label, name }: { label: string; name: string }) {
+  return (
+    <label className="flex flex-col gap-1.5 text-[13px] font-semibold">
+      {label}
+      <input
+        type="file"
+        name={name}
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+        className="h-11 w-full rounded-[10px] border border-line bg-white px-2.5 py-2 text-xs file:mr-2 file:rounded-md file:border-0 file:bg-sand file:px-2.5 file:py-1.5 file:text-xs file:font-semibold"
+      />
+    </label>
+  );
+}
+
 export default function AdminHomePage() {
   return (
     <Suspense fallback={<p className="text-sm text-cocoa">Loading home content…</p>}>
@@ -72,6 +86,7 @@ async function AdminHomeContent() {
             <Field label="Headline" name="heroHeadline" value={content.heroHeadline} />
             <Field label="Italic ending" name="heroHeadlineEm" value={content.heroHeadlineEm} />
             <Field label="Hero image URL (4:5)" name="heroImageUrl" value={content.heroImageUrl} placeholder="/uploads/hero.jpg" />
+            <Upload label="Or upload a new hero photo" name="heroFile" />
           </div>
           <Area label="Subcopy" name="heroSubcopy" value={content.heroSubcopy} />
           <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
@@ -86,6 +101,7 @@ async function AdminHomeContent() {
           <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
             <Field label="Seasonal headline" name="seasonalHeadline" value={content.seasonalHeadline} placeholder="Wedding season is here" />
             <Field label="Seasonal image URL" name="seasonalImageUrl" value={content.seasonalImageUrl} />
+            <Upload label="Or upload a seasonal photo" name="seasonalFile" />
             <Field label="Active from" name="seasonalFrom" type="date" value={inputDate(content.seasonalFrom)} />
             <Field label="Active to" name="seasonalTo" type="date" value={inputDate(content.seasonalTo)} />
           </div>
@@ -96,6 +112,7 @@ async function AdminHomeContent() {
           <Field label="Headline" name="flowerHeadline" value={content.flowerHeadline} />
           <Area label="Copy" name="flowerCopy" value={content.flowerCopy} rows={4} />
           <Field label="Image URL (4:5)" name="flowerImageUrl" value={content.flowerImageUrl} />
+          <Upload label="Or upload a new flower photo" name="flowerFile" />
         </Card>
 
         <Card title="Custom order steps">
@@ -114,6 +131,7 @@ async function AdminHomeContent() {
                 <input type="hidden" name="reviewIds" value={r.id} />
                 <Field label={`Caption ${index + 1}`} name={`reviewCaption_${r.id}`} value={r.caption} placeholder="Ayesha, Lahore" />
                 <Field label="Screenshot URL" name={`reviewImage_${r.id}`} value={r.imageUrl} placeholder="/uploads/review-1.jpg" />
+                <Upload label="Or upload a screenshot" name={`reviewFile_${r.id}`} />
                 <Field label="Order" name={`reviewOrder_${r.id}`} value={String(r.sortOrder)} type="number" />
                 <label className="flex h-11 items-center gap-2 text-sm font-semibold">
                   <input type="checkbox" name={`reviewPublished_${r.id}`} defaultChecked={r.published} className="h-5 w-5" />
@@ -140,6 +158,7 @@ async function AdminHomeContent() {
                 <Field label={`Label ${index + 1}`} name={`socialLabel_${t.id}`} value={t.label} placeholder="Reel" />
                 <Field label="Link" name={`socialHref_${t.id}`} value={t.href} />
                 <Field label="Image URL" name={`socialImage_${t.id}`} value={t.imageUrl} placeholder="/uploads/social-1.jpg" />
+                <Upload label="Or upload an image" name={`socialFile_${t.id}`} />
                 <Field label="Order" name={`socialOrder_${t.id}`} value={String(t.sortOrder)} type="number" />
                 <div className="flex gap-1.5">
                   <button type="submit" formAction={moveSocial} name="move" value={`${t.id}:up`} className={`${abtn} !h-9 border border-line bg-white !px-2.5`} aria-label={`Move social tile ${index + 1} up`}>

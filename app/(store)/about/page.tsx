@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { ArchFrame, Eyebrow, ResinArt } from "@/components/ui";
-import { TONES } from "@/lib/data/catalog";
+import { ArchFrame, Eyebrow } from "@/components/ui";
+import { STUDIO_PHOTOS } from "@/lib/data/studio-images";
 
 export const metadata: Metadata = {
   title: "About Ash and the studio",
@@ -12,9 +13,9 @@ export const metadata: Metadata = {
 };
 
 const PROCESS = [
-  { n: 1, title: "Pour", text: "Resin is mixed in small batches and poured with petals, pigment or gold leaf.", tone: TONES.gold },
-  { n: 2, title: "Cure", text: "Each piece sets slowly so it stays crystal clear.", tone: TONES.ocean },
-  { n: 3, title: "Polish", text: "Edges are sanded, polished and checked by hand before packing.", tone: TONES.blush },
+  { n: 1, title: "Pour", text: "Resin is mixed in small batches and poured with petals, pigment or gold leaf.", image: STUDIO_PHOTOS.process[0] },
+  { n: 2, title: "Cure", text: "Each piece sets slowly so it stays crystal clear.", image: STUDIO_PHOTOS.process[1] },
+  { n: 3, title: "Polish", text: "Edges are sanded, polished and checked by hand before packing.", image: STUDIO_PHOTOS.process[2] },
 ];
 
 export default function AboutPage() {
@@ -33,12 +34,18 @@ export default function AboutPage() {
           </div>
         </div>
         <ArchFrame className="enter-fade h-[420px] w-full lg:order-1 lg:h-[600px]" bg="#F1EBE4" inset={10} sheen>
-          {/* TODO(client): photo of Ash in her studio */}
           <div className="absolute inset-0">
-            <ResinArt seed="ash-studio" tone={["#F1EBE4", TONES.gold]} />
+            <Image
+              src={STUDIO_PHOTOS.about}
+              alt="Pressed flower jewellery from Ash's studio"
+              fill
+              priority
+              sizes="(min-width: 1024px) 600px, 100vw"
+              className="object-cover"
+            />
           </div>
           <span className="absolute inset-x-0 bottom-5 z-[3] text-center text-[10px] tracking-[0.12em] uppercase">
-            Photo · Ash in her studio
+            From the studio · made by Ash
           </span>
         </ArchFrame>
         <div className="flex flex-col gap-[22px] lg:hidden">
@@ -57,7 +64,7 @@ export default function AboutPage() {
               <article key={p.n} className="flex items-center gap-3.5 lg:flex-col lg:items-start lg:gap-5">
                 <ArchFrame className="h-[150px] w-[120px] shrink-0 lg:h-[300px] lg:w-full" bg="#FBF9F6" line="none">
                   <div className="absolute inset-0">
-                    <ResinArt seed={`process-${p.n}`} tone={["#FBF9F6", p.tone]} />
+                    <Image src={p.image} alt={p.title} fill sizes="(min-width: 1024px) 30vw, 120px" className="object-cover" />
                   </div>
                 </ArchFrame>
                 <div className="flex flex-col gap-1.5">
@@ -94,13 +101,13 @@ function Story() {
     <>
       <h2 className="font-display text-[32px] leading-[1.1] font-medium">Hi, I&apos;m Ash.</h2>
       <p className="text-[15px] leading-[1.7] lg:text-base">
-        [How the studio started: the first piece Ash made, who it was for, and when she decided to make it her work.]
+        Resin by Ash began with a simple idea: the flowers, names and colours that mark a big day shouldn’t have to fade. What started with pieces for family and friends grew, one request at a time, into a small studio.
       </p>
       <p className="text-[15px] leading-[1.7] lg:text-base">
-        [What she loves making most and why: nikkah sets, flowers from someone&apos;s big day, the moment a customer sees their piece.]
+        Ash loves the pieces that carry a story most — nikkah trays for a signing, a bridal bouquet pressed into a block, a first initial for a new baby. The best part is the message that arrives when the parcel is opened.
       </p>
       <span aria-hidden="true" className="mt-1.5 h-px w-10 bg-gold" />
-      <p className="font-display text-2xl leading-[1.4] italic">“[One line from Ash in her own words.]”</p>
+      <p className="font-display text-2xl leading-[1.4] italic">“I want every piece to feel like it was made for one person, because it was.”</p>
     </>
   );
 }

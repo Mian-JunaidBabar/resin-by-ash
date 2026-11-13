@@ -30,7 +30,7 @@ export const FAQ_GROUPS = [
         q: "How much is delivery?",
         a: "Lahore Rs 250 (1–2 days), Karachi Rs 300 (2–3 days), Islamabad and Rawalpindi Rs 300 (2–3 days), other major cities Rs 350 (3–4 days), rest of Pakistan Rs 400 (4–6 days).",
       },
-      { q: "Can I pay online instead?", a: "[Bank transfer or wallet options, if offered.]" },
+      { q: "Can I pay online instead?", a: "Cash on Delivery is standard. For large custom orders, bank transfer details are shared on WhatsApp." },
     ],
   },
   {
@@ -39,7 +39,7 @@ export const FAQ_GROUPS = [
     items: [
       { q: "Will resin turn yellow?", a: "Keep pieces out of direct sun to protect their clarity over time." },
       { q: "How do I clean my piece?", a: "Wipe with a soft dry cloth. Avoid perfume, water and harsh cleaners." },
-      { q: "Are trays food safe?", a: "[Confirm with Ash which pieces are food safe.]" },
+      { q: "Are trays food safe?", a: "The trinket trays are for jewellery and keepsakes, not food. Keep resin away from heat and direct sun." },
     ],
   },
 ];
