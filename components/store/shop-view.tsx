@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { DesktopSearch, ShopFilters } from "@/components/store/shop-filters";
+import { SeoBlock } from "@/components/store/seo-block";
 import { ArchFrame, Breadcrumbs, JsonLd, ProductCard } from "@/components/ui";
 import { OCCASIONS } from "@/lib/data/catalog";
 import { PRICE_MAX, PRICE_MIN, parseShopQuery, searchProducts } from "@/lib/queries";
@@ -9,35 +10,71 @@ import type { Category } from "@/lib/types";
 
 type SP = Promise<Record<string, string | string[] | undefined>>;
 
-/** Shared view for /shop and /shop/[category]. Static header in the shell; results stream per request. */
+function categoryHref(category: Category, parent?: Category) {
+  return parent ? `/shop/${parent.slug}/${category.slug}` : `/shop/${category.slug}`;
+}
+
+/** Shared view for /shop, /shop/[category] and /shop/[category]/[sub]. */
 export function ShopView({
   category,
+  parent,
   categories,
   searchParams,
 }: {
   category?: Category;
+  parent?: Category;
   categories: Category[];
   searchParams: SP;
 }) {
-  const title = category?.shortName ?? "Shop all";
+  const title = category?.h1 ?? category?.shortName ?? "Shop all";
+  const pageUrl = category ? categoryHref(category, parent) : "/shop";
   const crumbs = [
     { label: "Home", href: "/" },
-    ...(category ? [{ label: "Shop", href: "/shop" }, { label: category.shortName }] : [{ label: "Shop" }]),
+    ...(category ? [{ label: "Shop", href: "/shop" }] : [{ label: "Shop" }]),
+    ...(parent ? [{ label: parent.shortName, href: `/shop/${parent.slug}` }] : []),
+    ...(category ? [{ label: category.shortName }] : []),
   ];
 
   return (
     <>
       <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: crumbs.map((c, i) => ({
-            "@type": "ListItem",
-            position: i + 1,
-            name: c.label,
-            item: c.href ? absoluteUrl(c.href) : absoluteUrl(category ? `/shop/${category.slug}` : "/shop"),
-          })),
-        }}
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: crumbs.map((c, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: c.label,
+              item: c.href ? absoluteUrl(c.href) : absoluteUrl(pageUrl),
+            })),
+          },
+          ...(category
+            ? [
+                {
+                  "@context": "https://schema.org",
+                  "@type": "CollectionPage",
+                  name: category.name,
+                  description: category.seoDescription || category.intro,
+                  url: absoluteUrl(pageUrl),
+                  isPartOf: { "@type": "WebSite", "@id": absoluteUrl("/#website") },
+                },
+              ]
+            : []),
+          ...(category?.faq?.length
+            ? [
+                {
+                  "@context": "https://schema.org",
+                  "@type": "FAQPage",
+                  mainEntity: category.faq.map((f) => ({
+                    "@type": "Question",
+                    name: f.q,
+                    acceptedAnswer: { "@type": "Answer", text: f.a },
+                  })),
+                },
+              ]
+            : []),
+        ]}
       />
       <section className="wrap flex flex-col gap-3 pt-5 pb-2 lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:pt-9 lg:pb-5">
         <div className="flex flex-col gap-3 lg:gap-2.5">
@@ -51,8 +88,15 @@ export function ShopView({
       </section>
 
       <Suspense fallback={<ResultsSkeleton />}>
-        <Results category={category} categories={categories} searchParams={searchParams} />
+        <Results
+          category={category}
+          parent={parent}
+          categories={categories}
+          searchParams={searchParams}
+        />
       </Suspense>
+
+      {category ? <SeoBlock content={category.seoContent} faq={category.faq} /> : null}
 
       <section className="wrap pb-12 lg:pb-20">
         <div className="reveal flex flex-col gap-3 rounded-2xl bg-sand px-5 py-6 lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:rounded-[18px] lg:px-11 lg:py-9">
@@ -77,16 +121,39 @@ async function DesktopSearchSlot({ searchParams }: { searchParams: SP }) {
   return <DesktopSearch initial={q} />;
 }
 
-async function Results({ category, categories, searchParams }: { category?: Category; categories: Category[]; searchParams: SP }) {
+async function Results({
+  category,
+  parent,
+  categories,
+  searchParams,
+}: {
+  category?: Category;
+  parent?: Category;
+  categories: Category[];
+  searchParams: SP;
+}) {
   const sp = await searchParams;
-  const query = parseShopQuery(sp, category?.slug);
+  const query = parseShopQuery(sp, parent?.slug ?? category?.slug, parent ? category?.slug : undefined);
   const { items, total, shown, page, hasMore } = await searchProducts(query);
   const chips = [{ slug: "all", label: "All" }, ...categories.map((c) => ({ slug: c.slug, label: c.shortName }))];
 
   const nextParams = new URLSearchParams();
   for (const [k, v] of Object.entries(sp)) if (typeof v === "string" && k !== "page") nextParams.set(k, v);
   nextParams.set("page", String(page + 1));
-  const base = category ? `/shop/${category.slug}` : "/shop";
+  const base = category ? categoryHref(category, parent) : "/shop";
+
+  // Type links keep the current filters, so switching child category never loses a search.
+  const filterParams = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (typeof v === "string" && k !== "page" && k !== "sub") filterParams.set(k, v);
+  }
+  const filterSuffix = filterParams.toString() ? `?${filterParams.toString()}` : "";
+  const childLinks = category
+    ? (category.children ?? []).map((c) => ({
+        label: c.shortName,
+        href: `/shop/${category.slug}/${c.slug}${filterSuffix}`,
+      }))
+    : [];
 
   return (
     <>
@@ -102,8 +169,9 @@ async function Results({ category, categories, searchParams }: { category?: Cate
         }}
         total={total}
         categories={chips}
-        activeCategory={category?.slug}
+        activeCategory={parent?.slug ?? category?.slug}
         subcategories={category?.subcategories ?? []}
+        childLinks={childLinks}
         occasions={OCCASIONS}
         priceMin={PRICE_MIN}
         priceMax={PRICE_MAX}
@@ -117,19 +185,21 @@ async function Results({ category, categories, searchParams }: { category?: Cate
 
       {total > 0 ? (
         <>
-          <JsonLd
-            data={{
-              "@context": "https://schema.org",
-              "@type": "ItemList",
-              numberOfItems: total,
-              itemListElement: items.map((p, i) => ({
-                "@type": "ListItem",
-                position: i + 1,
-                url: absoluteUrl(`/product/${p.slug}`),
-                name: p.name,
-              })),
-            }}
-          />
+          {page === 1 ? (
+            <JsonLd
+              data={{
+                "@context": "https://schema.org",
+                "@type": "ItemList",
+                numberOfItems: total,
+                itemListElement: items.map((p, i) => ({
+                  "@type": "ListItem",
+                  position: i + 1,
+                  url: absoluteUrl(`/product/${p.slug}`),
+                  name: p.name,
+                })),
+              }}
+            />
+          ) : null}
           <p className="wrap -mt-1 mb-4 text-[13px] text-cocoa lg:mt-6 lg:mb-0 lg:text-sm">
             {total} {total === 1 ? "piece" : "pieces"}
           </p>

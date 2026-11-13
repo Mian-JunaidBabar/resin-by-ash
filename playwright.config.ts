@@ -13,11 +13,13 @@ const testDatabaseUrl = process.env.DATABASE_URL_TEST ?? process.env.DATABASE_UR
  */
 export default defineConfig({
   testDir: "./tests",
+  testMatch: "**/*.spec.ts",
   outputDir: "./test-results",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // One worker: E2E state changes share the test database and cache.
+  workers: 1,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"], ["html", { open: "never" }]],
   timeout: 45_000,
   expect: {

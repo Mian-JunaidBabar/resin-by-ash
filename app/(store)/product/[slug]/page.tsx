@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { PlusIcon } from "@/components/icons";
 import { Gallery } from "@/components/store/gallery";
 import { ProductPurchase } from "@/components/store/product-purchase";
+import { ShopPageSkeleton } from "@/components/store/shop-skeleton";
 import { Breadcrumbs, JsonLd, ProductCard } from "@/components/ui";
-import { PRODUCTS } from "@/lib/data/catalog";
 import { productPrice } from "@/lib/pricing";
-import { getCategory, getProduct, getRelated } from "@/lib/queries";
+import { getProduct, getProductStaticParams, getRelated } from "@/lib/queries";
 import { SITE, absoluteUrl } from "@/lib/site";
 
-export function generateStaticParams() {
-  return PRODUCTS.filter((p) => p.status === "live").map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return getProductStaticParams();
 }
 
-export async function generateMetadata({ params }: PageProps<"/product/[slug]">): Promise<Metadata> {
+type Params = Promise<{ slug: string }>;
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const p = await getProduct(slug);
-  if (!p) return {};
+  if (!p) notFound();
   const price = productPrice(p);
   const title = `${p.name}${price.onSale ? ` · ${price.off}% off` : ""}`;
   const description = `${p.description} Rs ${price.price.toLocaleString("en-US")}${
@@ -41,12 +44,32 @@ export async function generateMetadata({ params }: PageProps<"/product/[slug]">)
   };
 }
 
-export default async function ProductPage({ params }: PageProps<"/product/[slug]">) {
+export default function ProductPage({ params }: { params: Params }) {
+  return (
+    <Suspense fallback={<ShopPageSkeleton />}>
+      <ProductContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ProductContent({ params }: { params: Params }) {
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) notFound();
-  const [category, related] = await Promise.all([getCategory(product.category), getRelated(product)]);
+  const related = await getRelated(product);
   const price = productPrice(product);
+  const path = product.categoryPath ?? [{ slug: product.category, name: product.category, shortName: product.category }];
+  const category = path[0];
+  const categoryHref = category ? (path[1] ? `/shop/${category.slug}/${path[1].slug}` : `/shop/${category.slug}`) : "/shop";
+  const crumbs = [
+    { label: "Home", href: "/" },
+    { label: "Shop", href: "/shop" },
+    ...path.map((c, i) => ({
+      label: c.shortName,
+      href: i === path.length - 1 ? categoryHref : `/shop/${c.slug}`,
+    })),
+    { label: product.name },
+  ];
   const url = absoluteUrl(`/product/${product.slug}`);
 
   return (
@@ -82,11 +105,12 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
           {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
-            itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-              { "@type": "ListItem", position: 2, name: category?.shortName, item: absoluteUrl(`/shop/${product.category}`) },
-              { "@type": "ListItem", position: 3, name: product.name, item: url },
-            ],
+            itemListElement: crumbs.map((c, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: c.label,
+              item: c.href ? absoluteUrl(c.href) : url,
+            })),
           },
         ]}
       />
@@ -96,13 +120,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
 
         <div className="flex flex-col">
           <section className="flex flex-col gap-3 px-5 pt-[22px] md:px-10 lg:px-0 lg:pt-0">
-            <Breadcrumbs
-              items={[
-                { label: "Home", href: "/" },
-                { label: category?.shortName ?? "Shop", href: `/shop/${product.category}` },
-                { label: product.name },
-              ]}
-            />
+            <Breadcrumbs items={crumbs} />
             <h1 className="enter font-display text-4xl leading-[1.05] font-medium lg:text-5xl">{product.name}</h1>
             <p className="text-[15px] leading-relaxed lg:text-base">{product.description}</p>
           </section>

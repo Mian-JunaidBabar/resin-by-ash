@@ -1,14 +1,13 @@
 import { ViewTransition } from "react";
 import { Footer, Header, WhatsAppFab } from "@/components/store/chrome";
 import { JsonLd } from "@/components/ui";
-import { CATEGORIES } from "@/lib/data/catalog";
-import { getProducts } from "@/lib/queries";
+import { getCategoryTree, getProducts } from "@/lib/queries";
 import { productPrice } from "@/lib/pricing";
 import { SITE, absoluteUrl } from "@/lib/site";
 
 export default async function StoreLayout({ children }: LayoutProps<"/">) {
-  const products = await getProducts();
-  const catName = Object.fromEntries(CATEGORIES.map((c) => [c.slug, c.name]));
+  const [products, tree] = await Promise.all([getProducts(), getCategoryTree()]);
+  const catName = Object.fromEntries(tree.map((c) => [c.slug, c.name]));
   const searchItems = products.map((p) => ({
     slug: p.slug,
     name: p.name,
@@ -19,6 +18,9 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
       .filter(Boolean)
       .join(" "),
   }));
+  const shopLinks = tree
+    .filter((c) => c.showInFooter)
+    .map((c) => ({ label: c.shortName, href: `/shop/${c.slug}` }));
 
   return (
     <>
@@ -62,7 +64,7 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
       </ViewTransition>
-      <Footer />
+      <Footer shopLinks={shopLinks} />
       <WhatsAppFab />
     </>
   );

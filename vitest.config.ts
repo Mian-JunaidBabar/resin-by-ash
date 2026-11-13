@@ -6,7 +6,10 @@ dotenv.config({ path: ".env.local", quiet: true });
 
 export default defineConfig({
   resolve: {
-    alias: { "@": path.resolve(__dirname) },
+    alias: {
+      "@": path.resolve(__dirname),
+      "next/cache": path.resolve(__dirname, "tests/unit/mocks/next-cache.ts"),
+    },
   },
   test: {
     environment: "node",

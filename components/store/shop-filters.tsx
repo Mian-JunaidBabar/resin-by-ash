@@ -28,6 +28,8 @@ type Props = {
   categories: { slug: string; label: string }[];
   activeCategory?: string;
   subcategories: string[];
+  /** Child-category links on a top-level category page (keeps current filters). */
+  childLinks?: { label: string; href: string }[];
   occasions: readonly string[];
   priceMin: number;
   priceMax: number;
@@ -53,7 +55,7 @@ function toParams(s: FilterState) {
 }
 
 export function ShopFilters(props: Props) {
-  const { state, total, categories, activeCategory, subcategories, occasions, priceMin, priceMax } = props;
+  const { state, total, categories, activeCategory, subcategories, childLinks = [], occasions, priceMin, priceMax } = props;
   const router = useRouter();
   const pathname = usePathname();
   const [pending, start] = useTransition();
@@ -226,7 +228,18 @@ export function ShopFilters(props: Props) {
               <input type="checkbox" checked={state.custom} onChange={() => push({ custom: !state.custom })} className="h-5 w-5" />
               Customisable
             </label>
-            {subcategories.length ? (
+            {childLinks.length ? (
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                Type
+                <div className="flex flex-wrap gap-1.5">
+                  {childLinks.map((c) => (
+                    <Link key={c.href} href={c.href} className="chip !h-9 !px-3 !text-[13px]">
+                      {c.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : subcategories.length ? (
               <label className="flex items-center gap-2 text-sm font-semibold">
                 Type
                 <select
@@ -302,7 +315,18 @@ export function ShopFilters(props: Props) {
             </button>
           </div>
           <div className="flex flex-1 flex-col gap-[22px] overflow-y-auto px-5 py-[18px]">
-            {subcategories.length ? (
+            {childLinks.length ? (
+              <fieldset className="m-0 flex flex-col gap-2.5 border-0 p-0">
+                <legend className="mb-2.5 p-0 text-sm font-semibold">Category</legend>
+                <div className="flex flex-wrap gap-2">
+                  {childLinks.map((c) => (
+                    <Link key={c.href} href={c.href} className="chip !h-9 !px-3.5 !text-[13px]">
+                      {c.label}
+                    </Link>
+                  ))}
+                </div>
+              </fieldset>
+            ) : subcategories.length ? (
               <fieldset className="m-0 flex flex-col gap-2.5 border-0 p-0">
                 <legend className="mb-2.5 p-0 text-sm font-semibold">Category</legend>
                 <div className="flex flex-wrap gap-2">

@@ -3,28 +3,36 @@
  * Phase 2: these map 1:1 to database tables (see docs/phase-2/02-data-model.md).
  */
 
-export type CategorySlug =
-  | "nikkah"
-  | "jewellery"
-  | "flower-preservation"
-  | "keychains"
-  | "watches-clocks"
-  | "gifts";
+/** Categories are dynamic (admin-created), so slugs are plain strings. */
+export type CategorySlug = string;
+
+export type CategoryFaq = { q: string; a: string };
 
 export type Category = {
-  slug: CategorySlug;
+  slug: string;
   name: string;
   /** Shorter label for chips and nav */
   shortName: string;
+  h1?: string;
+  metaTitle?: string;
   intro: string;
   /** SEO description for the category page */
   seoDescription: string;
+  /** Markdown block rendered below the product grid */
+  seoContent?: string;
+  faq?: CategoryFaq[];
   subcategories: string[];
+  /** LIVE children, for the top-category chips and the "Type" links */
+  children?: { slug: string; name: string; shortName: string }[];
   showOnHome: boolean;
+  showInFooter: boolean;
   sortOrder: number;
   /** Placeholder tone until an arch tile photo is uploaded */
   tone: string;
   image?: string;
+  ogImage?: string;
+  parentSlug?: string;
+  status?: "LIVE" | "HIDDEN";
 };
 
 export type Occasion = "Nikkah" | "Wedding" | "Birthday" | "Eid" | "Anniversary" | "Gift";
@@ -46,6 +54,9 @@ export type Product = {
   slug: string;
   name: string;
   category: CategorySlug;
+  categoryId?: string;
+  /** Top-level + child category chain, used for breadcrumbs and links */
+  categoryPath?: { slug: string; name: string; shortName: string }[];
   subcategory?: string;
   /** One or two sentences, shown under the price */
   description: string;
@@ -157,4 +168,32 @@ export type Customer = {
   spent: number;
   last: string;
   tag?: string;
+};
+
+/** Storefront settings, editable in the admin. */
+export type StoreSettings = {
+  whatsappNumber: string;
+  whatsappDisplay: string;
+  instagram: string;
+  tiktok: string;
+  studioHours: { days: string; hours: string }[];
+  announcementOn: boolean;
+  announcement: string;
+  orderPrefix: string;
+  defaultLeadTime: string;
+  orderMessageTemplate: string;
+  acceptCod: boolean;
+  searchSynonyms: Record<string, string>;
+  faq: { id: string; title: string; items: { q: string; a: string }[] }[];
+  heroImageUrl?: string;
+  heroHeadline?: string;
+};
+
+export type DeliveryZone = {
+  id: string;
+  label: string;
+  cities: string[];
+  charge: number;
+  days: string;
+  position: number;
 };

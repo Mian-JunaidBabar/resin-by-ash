@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 import { CartLink, DesktopNav, MobileMenu, SearchButton, type SearchItem } from "@/components/store/header-client";
 import { SITE, TRUST_POINTS } from "@/lib/site";
@@ -21,8 +22,12 @@ export function Header({ searchItems }: { searchItems: SearchItem[] }) {
         <div className="wrap grid h-[76px] grid-cols-[88px_1fr_88px] items-center !px-2 md:!px-10 lg:h-[88px] lg:grid-cols-[200px_1fr_200px] xl:!px-[120px]">
           {/* Left: mobile menu + search / desktop logo */}
           <div className="flex items-center lg:hidden">
-            <MobileMenu />
-            <SearchButton items={searchItems} />
+            <Suspense fallback={<span className="h-11 w-11" />}>
+              <MobileMenu />
+            </Suspense>
+            <Suspense fallback={<span className="h-11 w-11" />}>
+              <SearchButton items={searchItems} />
+            </Suspense>
           </div>
           <Link href="/" aria-label={`${SITE.name} home`} className="hidden w-[72px] lg:flex">
             <Image src="/brand/logo-256.png" alt={SITE.name} width={72} height={72} priority className="rounded-full" />
@@ -32,12 +37,16 @@ export function Header({ searchItems }: { searchItems: SearchItem[] }) {
           <Link href="/" aria-label={`${SITE.name} home`} className="flex justify-center lg:hidden">
             <Image src="/brand/logo-256.png" alt={SITE.name} width={58} height={58} priority className="rounded-full" />
           </Link>
-          <DesktopNav />
+          <Suspense fallback={<span className="hidden h-11 lg:block" />}>
+            <DesktopNav />
+          </Suspense>
 
           {/* Right */}
           <div className="flex items-center justify-end gap-0.5 lg:gap-1">
             <span className="hidden lg:block">
-              <SearchButton items={searchItems} />
+              <Suspense fallback={<span className="block h-11 w-11" />}>
+                <SearchButton items={searchItems} />
+              </Suspense>
             </span>
             <CartLink />
             <a
@@ -91,7 +100,7 @@ function FooterCol({ title, links }: { title: string; links: { label: string; hr
   );
 }
 
-export function Footer() {
+export function Footer({ shopLinks = SHOP_LINKS }: { shopLinks?: { label: string; href: string }[] }) {
   return (
     <footer className="bg-brown text-cream">
       <div className="wrap flex flex-col gap-7 pt-10 pb-7 lg:gap-10 lg:pt-16 lg:pb-9">
@@ -112,7 +121,7 @@ export function Footer() {
             </div>
             <span aria-hidden="true" className="h-px w-10 bg-gold lg:hidden" />
           </div>
-          <FooterCol title="Shop" links={SHOP_LINKS} />
+          <FooterCol title="Shop" links={[{ label: "All pieces", href: "/shop" }, ...shopLinks]} />
           <FooterCol title="Help" links={HELP_LINKS} />
           <div className="col-span-2 lg:col-span-1">
             <div className="flex gap-2.5 lg:hidden">
