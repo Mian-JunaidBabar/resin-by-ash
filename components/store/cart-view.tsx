@@ -56,6 +56,8 @@ export function CartView() {
   }
 
   const submit = (form: FormData) => {
+    // Honeypot: real customers never fill this hidden field.
+    if (String(form.get("website") ?? "").trim()) return;
     // Open the WhatsApp tab inside the click so popup blockers allow it; we point it at wa.me once the order is saved.
     const tab = typeof window !== "undefined" ? window.open("", "_blank") : null;
     start(async () => {
@@ -107,6 +109,7 @@ export function CartView() {
 
   return (
     <form action={submit} className="wrap grid gap-0 pb-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-16 lg:pt-6 lg:pb-20">
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute h-px w-px opacity-0" />
       <div>
         <section className="flex flex-col gap-1.5 pt-[22px] pb-1.5">
           <h1 className="enter font-display text-[40px] leading-[1.05] font-medium lg:text-6xl">Your cart</h1>

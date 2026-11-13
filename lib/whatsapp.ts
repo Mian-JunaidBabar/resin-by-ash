@@ -14,7 +14,7 @@ export function personalisationSummary(p: Personalisation) {
   if (p.date) parts.push(`Date: ${formatDate(p.date)}`);
   if (p.text) parts.push(`Text: "${p.text}"`);
   if (p.textColour) parts.push(`Text colour: ${p.textColour}`);
-  if (p.referenceImage) parts.push(`Reference image: ${p.referenceImage} (sending in chat)`);
+  if (p.referenceImage) parts.push("Reference image attached (sending in chat)");
   return parts.join(" · ");
 }
 

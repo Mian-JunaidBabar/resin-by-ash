@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useId, useState } from "react";
+import { uploadReferenceImage } from "@/app/(store)/actions";
 import { BagIcon, CheckIcon, ClockIcon, UploadIcon, WhatsAppIcon } from "@/components/icons";
 import { cart } from "@/lib/cart";
 import { rs, variantPrice } from "@/lib/pricing";
@@ -18,6 +19,8 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [per, setPer] = useState<Personalisation>({});
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const ids = { names: useId(), date: useId(), text: useId(), colour: useId(), file: useId() };
 
   const size = sizes[sizeI];
@@ -189,17 +192,33 @@ export function ProductPurchase({ product }: { product: Product }) {
             >
               <UploadIcon size={22} />
               <span className="flex flex-col gap-0.5">
-                <strong className="text-sm font-semibold">{per.referenceImage ?? "Reference image"}</strong>
+                <strong className="text-sm font-semibold">
+                  {uploading ? "Uploading photo…" : per.referenceImage ? "Reference photo attached" : "Reference image"}
+                </strong>
                 <span className="text-[13px]">
-                  {per.referenceImage ? "You'll send this photo in the WhatsApp chat" : "Optional · JPG or PNG"}
+                  {uploadError
+                    ? uploadError
+                    : per.referenceImage
+                      ? "We'll attach it to your order"
+                      : "Optional · JPG or PNG"}
                 </span>
               </span>
-              {/* Phase 2: upload to storage and attach the URL to the order line. */}
               <input
                 id={ids.file}
                 type="file"
                 accept="image/*"
-                onChange={(e) => set("referenceImage", e.target.files?.[0]?.name ?? "")}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploading(true);
+                  setUploadError("");
+                  const form = new FormData();
+                  form.set("file", file);
+                  const res = await uploadReferenceImage(form);
+                  setUploading(false);
+                  if (res.ok) set("referenceImage", res.url);
+                  else setUploadError(res.error);
+                }}
                 className="absolute h-px w-px opacity-0"
               />
             </label>
